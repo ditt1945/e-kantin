@@ -1,0 +1,237 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container py-5">
+    {{-- Header --}}
+    <div class="mb-4 mb-md-5">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div>
+                <h2 class="orders-title">
+                    <i class="fas fa-history me-2" style="color: var(--primary);"></i>Riwayat Pesanan
+                </h2>
+                <p class="orders-subtitle d-none d-md-block">Lihat semua pesanan yang telah Anda buat</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('customer.dashboard') }}" class="btn btn-sm btn-primary" style="padding: 0.5rem 1rem; border-radius: 8px;">
+                    <i class="fas fa-home me-1"></i><span class="d-none d-sm-inline">Dashboard</span>
+                </a>
+                <button onclick="history.back()" class="btn btn-sm" style="background: var(--light-gray); border: none; color: var(--text-primary); padding: 0.5rem 1rem; border-radius: 8px;">
+                    <i class="fas fa-arrow-left me-1"></i><span class="d-none d-sm-inline">Kembali</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+@if($orders->count() > 0)
+    <div class="row g-3">
+        @foreach($orders as $order)
+        @php
+            $badgeClass = match($order->status) {
+                'selesai' => 'success',
+                'diproses' => 'warning',
+                'pending' => 'primary',
+                'pending_cash' => 'info',
+                'dibatalkan' => 'danger',
+                default => 'secondary',
+            };
+            $colorMap = [
+                'success' => '#B6CEB4',
+                'warning' => '#D9E9CF',
+                'primary' => '#96A78D',
+                'info' => '#87CEEB',
+                'danger' => '#6f7d63',
+                'secondary' => '#F0F0F0',
+            ];
+            $borderColor = $colorMap[$badgeClass] ?? '#64748b';
+            $payment = $order->payment;
+        @endphp
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3 order-status-border order-border-{{ $badgeClass }}">
+                        <div>
+                            <h6 class="mb-1" style="font-weight: 700; color: var(--text-primary);">{{ $order->kode_pesanan ?? '-' }}</h6>
+                            <small style="color: var(--text-secondary);">{{ $order->tenant->nama_tenant ?? '-' }} • {{ optional($order->created_at)->format('d M Y H:i') }}</small>
+                        </div>
+                        <span class="badge bg-{{ $badgeClass }}">
+                            <i class="fas fa-check me-1"></i>{{ ucfirst($order->status) }}
+                        </span>
+                    </div>
+
+                    <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                        @foreach($order->orderItems as $it)
+                            <div class="d-flex justify-content-between mb-2" style="padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-gray);">
+                                <span style="color: var(--text-secondary);">{{ $it->quantity }}x {{ $it->menu->nama_menu ?? '-' }}</span>
+                                <strong>Rp {{ number_format($it->subtotal, 0, ',', '.') }}</strong>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <small style="color: var(--text-secondary);">Total</small>
+                            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">Rp {{ number_format($order->total_harga ?? 0, 0, ',', '.') }}</div>
+                            @if($payment)
+                                <small class="d-block" style="color: var(--text-secondary);">
+                                    Invoice: {{ $payment->invoice_number }}
+                                    @if($payment->isPaid())
+                                        <span class="badge bg-success ms-2">Lunas</span>
+                                    @elseif($payment->isFailed())
+                                        <span class="badge bg-danger ms-2">Gagal</span>
+                                    @elseif($payment->status === 'pending_cash')
+                                        <span class="badge bg-info ms-2">Bayar Tunai</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark ms-2">Menunggu Pembayaran</span>
+                                    @endif
+                                </small>
+                            @endif
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            @if($payment)
+                                @if($payment->isPaid())
+                                    {{-- Already paid - show success badge and invoice download --}}
+                                    <span class="badge bg-success py-2 px-3 d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-1"></i>Lunas
+                                    </span>
+                                    <a href="{{ route('payment.invoice', $payment) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file-invoice me-1"></i>Unduh Invoice
+                                    </a>
+                                @elseif($payment->isFailed())
+                                    {{-- Payment failed --}}
+                                    <span class="badge bg-danger py-2 px-3 d-flex align-items-center">
+                                        <i class="fas fa-times-circle me-1"></i>Gagal
+                                    </span>
+                                @elseif($payment->status === 'pending_cash')
+                                    {{-- Cash payment pending --}}
+                                    <span class="badge bg-info py-2 px-3 d-flex align-items-center">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Menunggu Pembayaran Tunai
+                                    </span>
+                                    <a href="{{ route('payment.show', $order) }}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye me-1"></i>Detail
+                                    </a>
+                                @else
+                                    {{-- Payment pending - show pay button --}}
+                                    <a href="{{ route('payment.show', $order) }}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-credit-card me-1"></i>Bayar Sekarang
+                                    </a>
+                                    <a href="{{ route('payment.verify', $order) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-sync-alt me-1"></i>Cek Status
+                                    </a>
+                                @endif
+                            @else
+                                {{-- No payment record --}}
+                                <span class="badge bg-secondary py-2 px-3">Belum ada pembayaran</span>
+                            @endif
+
+                            @if(($order->status === 'pending' || $order->status === 'pending_cash') && (!$payment || !$payment->isPaid()))
+                                <form action="{{ route('customer.orders.cancel', $order) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Batalkan pesanan ini?')">
+                                        <i class="fas fa-times me-1"></i>Batalkan
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+@else
+<div class="text-center py-5">
+    <i class="fas fa-history fa-4x text-muted mb-3"></i>
+    <h4 class="text-muted">Belum ada riwayat pesanan</h4>
+    <p class="text-muted">Mulai pesan dari tenant untuk melihat riwayat pesanan di sini.</p>
+    <a href="{{ route('customer.tenants') }}" class="btn btn-primary">Telusuri Tenant</a>
+</div>
+@endif
+
+@endsection
+
+@push('styles')
+<style>
+    .orders-title {
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 0.3rem;
+    }
+    .orders-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+    .order-status-border {
+        border-left: 6px solid #F0F0F0;
+        padding-left: 1rem;
+    }
+    .order-border-success { border-left-color: #B6CEB4 !important; }
+    .order-border-warning { border-left-color: #D9E9CF !important; }
+    .order-border-primary { border-left-color: #96A78D !important; }
+    .order-border-danger { border-left-color: #6f7d63 !important; }
+    .order-border-secondary { border-left-color: #F0F0F0 !important; }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .container.py-5 {
+            padding-top: 1rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+        .orders-title {
+            font-size: 1.4rem;
+        }
+        .card-body {
+            padding: 1rem !important;
+        }
+        .order-status-border {
+            padding-left: 0.75rem;
+            border-left-width: 4px;
+        }
+        .order-status-border h6 {
+            font-size: 0.9rem !important;
+        }
+        .order-status-border small {
+            font-size: 0.75rem !important;
+        }
+        .order-status-border .badge {
+            font-size: 0.7rem !important;
+            padding: 0.25rem 0.5rem !important;
+        }
+        .d-flex.justify-content-between.align-items-center.flex-wrap.gap-3 {
+            gap: 0.75rem !important;
+        }
+        .d-flex.flex-wrap.gap-2 {
+            gap: 0.5rem !important;
+            width: 100%;
+        }
+        .d-flex.flex-wrap.gap-2 .btn,
+        .d-flex.flex-wrap.gap-2 .badge {
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.6rem !important;
+        }
+        .d-flex.flex-wrap.gap-2 .btn i,
+        .d-flex.flex-wrap.gap-2 .badge i {
+            font-size: 0.7rem !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .orders-title {
+            font-size: 1.25rem;
+        }
+        .orders-title i {
+            font-size: 1rem;
+        }
+        .d-flex.flex-wrap.gap-2 {
+            flex-direction: column;
+        }
+        .d-flex.flex-wrap.gap-2 .btn,
+        .d-flex.flex-wrap.gap-2 .badge {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+@endpush
