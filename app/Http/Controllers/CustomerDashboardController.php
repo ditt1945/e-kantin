@@ -50,7 +50,14 @@ class CustomerDashboardController extends Controller
             ->limit(3)
             ->get();
 
-            return view('customer.dashboard', compact('stats', 'recent_orders', 'favorite_tenants'));
+            // Hitung jumlah item di keranjang
+            $cart = session()->get('cart', []);
+            $cart_count = 0;
+            foreach ($cart as $tenant_id => $items) {
+                $cart_count += count($items);
+            }
+
+            return view('customer.dashboard', compact('stats', 'recent_orders', 'favorite_tenants', 'cart_count'));
         } catch (\Exception $e) {
             \Log::error('Customer Dashboard Error: ' . $e->getMessage());
             return redirect()->route('login')->with('error', 'Error loading dashboard: ' . $e->getMessage());

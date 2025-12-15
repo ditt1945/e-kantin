@@ -46,7 +46,7 @@
         $statuses = [
             'all' => ['label' => 'Semua', 'class' => 'secondary'],
             'pending' => ['label' => 'Menunggu', 'class' => 'primary'],
-            'pending_cash' => ['label' => 'Tunai', 'class' => 'info'],
+            'pending_cash' => ['label' => 'Tunai', 'class' => 'cash'],
             'diproses' => ['label' => 'Diproses', 'class' => 'warning'],
             'selesai' => ['label' => 'Selesai', 'class' => 'success'],
             'dibatalkan' => ['label' => 'Batal', 'class' => 'danger'],
@@ -70,7 +70,7 @@
                     $borderClass = 'border-start border-4 ';
                     switch($order->status) {
                         case 'pending': $borderClass .= 'border-primary'; break;
-                        case 'pending_cash': $borderClass .= 'border-info'; break;
+                        case 'pending_cash': $borderClass .= 'border-cash'; break;
                         case 'diproses': $borderClass .= 'border-warning'; break;
                         case 'selesai': $borderClass .= 'border-success'; break;
                         case 'dibatalkan': $borderClass .= 'border-danger'; break;
@@ -81,7 +81,7 @@
                         'selesai' => 'success',
                         'diproses' => 'warning',
                         'pending' => 'primary',
-                        'pending_cash' => 'info',
+                        'pending_cash' => 'cash',
                         'dibatalkan' => 'danger',
                         default => 'secondary',
                     };
@@ -103,11 +103,15 @@
                                         <i class="fas fa-clock me-1"></i>{{ optional($order->created_at)->format('d M H:i') }}
                                     </div>
                                     <div class="mt-2">
-                                        @foreach($order->orderItems as $item)
-                                            <span class="badge bg-light text-dark me-1 mb-1" style="font-size: 0.75rem;">
-                                                {{ $item->quantity }}x {{ $item->menu->nama_menu ?? '-' }}
-                                            </span>
-                                        @endforeach
+                                        <div class="order-items-container">
+                                            @foreach($order->orderItems as $index => $item)
+                                                <div class="order-item-badge">
+                                                    <span class="item-quantity">{{ $item->quantity }}x</span>
+                                                    <span class="item-name">{{ $item->menu->nama_menu ?? '-' }}</span>
+                                                    <span class="item-price">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
 
@@ -121,7 +125,7 @@
                                             {{-- Cash Payment - Show Confirm Button --}}
                                             <form action="{{ route('tenant.orders.confirm_cash', $order) }}" method="POST" class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-info text-white" title="Konfirmasi pembayaran tunai">
+                                                <button type="submit" class="btn btn-sm btn-cash text-white" title="Konfirmasi pembayaran tunai">
                                                     <i class="fas fa-money-bill-wave me-1"></i>
                                                     <span class="d-none d-md-inline">Konfirmasi Tunai</span>
                                                     <span class="d-md-none">Tunai</span>
@@ -198,6 +202,149 @@
         font-size: 1.5rem;
         font-weight: 600;
     }
+
+    /* Pending cash visual treatment */
+    .btn-cash {
+        background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+        border-color: #0ea5e9;
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(6, 182, 212, 0.35);
+    }
+
+    .btn-cash:hover,
+    .btn-cash:focus {
+        color: #fff;
+        box-shadow: 0 8px 22px rgba(6, 182, 212, 0.45);
+    }
+
+    .btn-outline-cash {
+        color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+
+    .btn-outline-cash:hover,
+    .btn-outline-cash:focus {
+        background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(6, 182, 212, 0.35);
+    }
+
+    .badge.bg-cash {
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.95), rgba(6, 182, 212, 0.95));
+        color: #fff;
+    }
+
+    /* Dark mode styles for cash badge and button */
+    [data-theme="dark"] .badge.bg-cash {
+        background: linear-gradient(135deg, #0284C7, #0369A1) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
+    }
+
+    [data-theme="dark"] .btn-cash {
+        background: linear-gradient(135deg, #0284C7, #0369A1) !important;
+        border-color: #0284C7 !important;
+        color: #ffffff !important;
+        box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+    }
+
+    [data-theme="dark"] .btn-cash:hover,
+    [data-theme="dark"] .btn-cash:focus {
+        background: linear-gradient(135deg, #0369A1, #075985) !important;
+        color: #ffffff !important;
+        box-shadow: 0 8px 22px rgba(2, 132, 199, 0.45);
+    }
+
+    [data-theme="dark"] .border-cash {
+        border-color: #0284C7 !important;
+    }
+
+    /* Dark mode for order item badges */
+    [data-theme="dark"] .badge.bg-light {
+        background: rgba(148, 163, 184, 0.2) !important;
+        color: #f1f5f9 !important;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    /* Improved Order Items UI */
+    .order-items-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .order-item-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-item-badge:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary);
+    }
+
+    .item-quantity {
+        background: var(--primary);
+        color: white;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        min-width: 28px;
+        text-align: center;
+    }
+
+    .item-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .item-price {
+        font-weight: 600;
+        color: var(--success);
+        font-size: 0.75rem;
+        background: rgba(22, 163, 74, 0.1);
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+    }
+
+    /* Dark mode for order items */
+    [data-theme="dark"] .order-item-badge {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        border-color: rgba(71, 85, 105, 0.5);
+    }
+
+    [data-theme="dark"] .order-item-badge:hover {
+        border-color: var(--primary);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-theme="dark"] .item-name {
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .item-price {
+        background: rgba(22, 163, 74, 0.2);
+        color: #4ADE80;
+    }
+
+    .border-cash {
+        border-color: #0ea5e9 !important;
+    }
     
     @media (max-width: 768px) {
         .orders-title {
@@ -234,6 +381,29 @@
         /* Order item badges */
         .badge.bg-light {
             font-size: 0.7rem !important;
+        }
+
+        /* Order items responsive */
+        .order-item-badge {
+            padding: 0.3rem 0.5rem !important;
+            font-size: 0.7rem !important;
+            gap: 0.3rem !important;
+        }
+
+        .item-quantity {
+            font-size: 0.65rem !important;
+            min-width: 24px !important;
+            padding: 0.15rem 0.3rem !important;
+        }
+
+        .item-name {
+            max-width: 100px !important;
+            font-size: 0.7rem !important;
+        }
+
+        .item-price {
+            font-size: 0.65rem !important;
+            padding: 0.15rem 0.3rem !important;
         }
     }
     

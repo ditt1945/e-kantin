@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'e-Kantin')</title>
+    <title>@yield('title', 'e-Kantin - Kantin Digital SMKN 2 Surabaya')</title>
+
+    <!-- Include loading states early -->
+    @include('partials.loading-states')
+
+    <!-- Include mobile optimizations -->
+    @include('partials.mobile-optimizations')
+
+    <!-- Include custom styles -->
+    @stack('styles')
 
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -353,9 +362,26 @@
             color: var(--text-primary) !important;
         }
 
+        [data-theme="dark"] .badge.bg-info {
+            background: #1E40AF !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 4px rgba(30, 64, 175, 0.3);
+        }
+
+        /* Also fix bg-info in light mode for better contrast */
+        .badge.bg-info {
+            background: #0EA5E9 !important;
+            color: #ffffff !important;
+        }
+
         [data-theme="dark"] .modal-content {
             background: var(--card-bg);
             border-color: var(--border-gray);
+        }
+
+        /* Dark mode for order borders */
+        [data-theme="dark"] .order-border-info {
+            border-left-color: #1E40AF !important;
         }
 
         [data-theme="dark"] .modal-header,
@@ -1108,9 +1134,423 @@
             .quick-action { height: 70px; }
             .card .card-header { padding: 0.75rem; font-size: 0.9rem; }
         }
+
+        /* ==================== ADMIN ENHANCEMENTS ==================== */
+
+        /* Admin Dashboard Cards */
+        .admin-dashboard-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), #06b6d4, #10b981);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .admin-dashboard-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .admin-dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-light);
+        }
+
+        /* Admin Stats Cards */
+        .admin-stats-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-stats-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(var(--primary-rgb), 0.05) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .admin-stats-card:hover::after {
+            opacity: 1;
+        }
+
+        .admin-stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .admin-stats-card h5 {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            font-size: 1.75rem;
+        }
+
+        .admin-stats-card h6 {
+            font-weight: 500;
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        /* Admin Table Enhancements */
+        .admin-table {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-table .table {
+            margin-bottom: 0;
+        }
+
+        .admin-table .table-light {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .admin-table .table th {
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        .admin-table .table td {
+            vertical-align: middle;
+            font-size: 0.875rem;
+        }
+
+        /* Admin Form Enhancements */
+        .admin-form {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-form .form-label {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-form .form-control,
+        .admin-form .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .admin-form .form-control:focus,
+        .admin-form .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        }
+
+        /* Admin Button Enhancements */
+        .admin-btn {
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s cubic-bezier(0.23, 1, 0.320, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .admin-btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #ffffff;
+            border: none;
+        }
+
+        .admin-btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+        }
+
+        .admin-btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #10b981 100%);
+            color: #ffffff;
+            border: none;
+        }
+
+        .admin-btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .admin-btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);
+            color: #ffffff;
+            border: none;
+        }
+
+        .admin-btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: #ffffff;
+            border: none;
+        }
+
+        .admin-btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-gray);
+            color: var(--text-secondary);
+        }
+
+        .admin-btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.05);
+        }
+
+        .admin-btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Admin Status Badges */
+        .admin-badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .admin-badge-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #ffffff;
+        }
+
+        .admin-badge-success {
+            background: linear-gradient(135deg, var(--success), #10b981);
+            color: #ffffff;
+        }
+
+        .admin-badge-warning {
+            background: linear-gradient(135deg, var(--warning), #f59e0b);
+            color: #ffffff;
+        }
+
+        .admin-badge-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: #ffffff;
+        }
+
+        .admin-badge-info {
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            color: #ffffff;
+        }
+
+        /* Admin Alert Boxes */
+        .admin-alert {
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            border: none;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .admin-alert-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.1));
+            color: #166534;
+            border-left: 4px solid #10b981;
+        }
+
+        .admin-alert-warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .admin-alert-danger {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(239, 68, 68, 0.1));
+            color: #991b1b;
+            border-left: 4px solid #dc2626;
+        }
+
+        .admin-alert-info {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(6, 182, 212, 0.1));
+            color: #075985;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        /* Admin Modal Enhancements */
+        .admin-modal .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .admin-modal .modal-header {
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--border-gray) 100%);
+            border-bottom: 1px solid var(--border-gray);
+            border-radius: 16px 16px 0 0;
+            padding: 1.5rem;
+        }
+
+        .admin-modal .modal-body {
+            padding: 1.5rem;
+        }
+
+        .admin-modal .modal-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        /* Admin Navigation */
+        .admin-sidebar .nav-link {
+            border-radius: 8px;
+            margin-bottom: 0.25rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .admin-sidebar .nav-link:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .admin-sidebar .nav-link.active {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.3);
+        }
+
+        /* Admin Loading States */
+        .admin-loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-gray);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: admin-spin 0.8s linear infinite;
+        }
+
+        @keyframes admin-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Admin Charts */
+        .admin-chart-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dark mode adjustments for admin */
+        [data-theme="dark"] .admin-dashboard-card,
+        [data-theme="dark"] .admin-stats-card,
+        [data-theme="dark"] .admin-table,
+        [data-theme="dark"] .admin-form {
+            background: var(--card-bg);
+            border-color: #374151;
+        }
+
+        [data-theme="dark"] .admin-table .table-light {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+        }
+
+        [data-theme="dark"] .admin-form .form-control,
+        [data-theme="dark"] .admin-form .form-select {
+            background: var(--input-bg);
+            border-color: #4b5563;
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .admin-form .form-control:focus,
+        [data-theme="dark"] .admin-form .form-select:focus {
+            border-color: var(--primary);
+        }
+
+        [data-theme="dark"] .admin-modal .modal-content {
+            background: var(--card-bg);
+        }
+
+        [data-theme="dark"] .admin-modal .modal-header {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #374151 100%);
+            border-bottom-color: #4b5563;
+        }
+
+        /* Responsive for admin */
+        @media (max-width: 768px) {
+            .admin-dashboard-card {
+                padding: 1rem;
+            }
+
+            .admin-stats-card {
+                padding: 1rem;
+            }
+
+            .admin-stats-card h5 {
+                font-size: 1.5rem;
+            }
+
+            .admin-form {
+                padding: 1rem;
+            }
+
+            .admin-table {
+                border-radius: 8px;
+            }
+
+            .admin-table .table th,
+            .admin-table .table td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Include favicon fallback for better browser support -->
+    @include('partials.favicon-fallback')
     <!-- Loading Screen -->
     <div class="page-loader" id="pageLoader">
         <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" class="loader-logo">
@@ -1193,6 +1633,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('tenants.index') }}">
                                 <i class="fas fa-store me-1"></i>Tenant
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('users.index') }}">
+                                <i class="fas fa-users me-1"></i>Pengguna
                             </a>
                         </li>
                         <li class="nav-item">

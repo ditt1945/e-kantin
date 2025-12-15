@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
 
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users/check-role', [AdminUserController::class, 'checkRole'])->name('users.check-role');
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });

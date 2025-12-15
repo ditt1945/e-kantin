@@ -1,7 +1,58 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.theme-toggle i {
+    font-size: 1.2rem;
+    color: #2563EB;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(71, 85, 105, 0.3);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background: rgba(15, 23, 42, 0.95);
+}
+
+[data-theme="dark"] .theme-toggle i {
+    color: #fbbf24;
+}
+</style>
+@endpush
+
 @section('content')
 <div class="register-page" data-bs-theme="light">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
     <div class="register-container">
         {{-- Left Side - Branding --}}
         <div class="register-branding d-none d-lg-flex">
@@ -177,11 +228,12 @@
 /* Register Page Styles */
 .register-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    transition: background 0.3s ease;
 }
 
 .register-container {
@@ -191,7 +243,19 @@
     background: #fff;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .register-page {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+[data-theme="dark"] .register-container {
+    background: #0f172a;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* Branding Section */
@@ -342,20 +406,20 @@
 .logo-icon-sm {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 0.75rem;
     font-size: 1.5rem;
-    color: white;
+    color: #1e40af;
 }
 
 .mobile-logo h2 {
     font-size: 1.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -369,14 +433,27 @@
 .form-header h3 {
     font-size: 1.5rem;
     font-weight: 800;
-    color: #1a1a2e;
+    color: #1e293b;
     margin: 0 0 0.3rem;
 }
 
 .form-header p {
-    color: #6b7280;
+    color: #64748b;
     margin: 0;
     font-size: 0.9rem;
+}
+
+/* Dark mode form section */
+[data-theme="dark"] .register-form-section {
+    background: #0f172a;
+}
+
+[data-theme="dark"] .form-header h3 {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .form-header p {
+    color: #cbd5e1;
 }
 
 .register-form .form-group {
@@ -407,8 +484,8 @@
     border-radius: 10px;
     font-size: 0.95rem;
     transition: all 0.3s ease;
-    background: #f9fafb;
-    color: #1a1a2e;
+    background: #f8fafc;
+    color: #1e293b;
 }
 
 .register-form input:focus {
@@ -423,7 +500,34 @@
 }
 
 .register-form input::placeholder {
-    color: #9ca3af;
+    color: #94a3b8;
+}
+
+/* Dark mode form elements */
+[data-theme="dark"] .register-form label {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .register-form label i {
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .register-form input[type="text"],
+[data-theme="dark"] .register-form input[type="email"],
+[data-theme="dark"] .register-form input[type="password"] {
+    background: #1e293b;
+    border-color: rgba(71, 85, 105, 0.5);
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .register-form input:focus {
+    background: #334155;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+}
+
+[data-theme="dark"] .register-form input::placeholder {
+    color: #64748b;
 }
 
 .form-row {
@@ -473,8 +577,8 @@
 .btn-register {
     width: 100%;
     padding: 0.875rem;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-    color: white;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
     border: none;
     border-radius: 10px;
     font-size: 1rem;
@@ -485,12 +589,12 @@
     justify-content: center;
     gap: 0.5rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
 }
 
 .btn-register:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
 }
 
 .btn-register:active {
@@ -520,14 +624,14 @@
 .login-link {
     text-align: center;
     padding: 1rem;
-    background: #f9fafb;
+    background: #f8fafc;
     border-radius: 10px;
     margin-bottom: 1rem;
 }
 
 .login-link p {
     margin: 0 0 0.3rem;
-    color: #6b7280;
+    color: #64748b;
     font-size: 0.85rem;
 }
 
@@ -556,6 +660,50 @@
     font-size: 0.85rem;
 }
 
+/* Dark mode remaining elements */
+[data-theme="dark"] .terms-check label {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .terms-check a {
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .btn-register {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="dark"] .btn-register:hover {
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+[data-theme="dark"] .divider {
+    color: #64748b;
+}
+
+[data-theme="dark"] .divider::before,
+[data-theme="dark"] .divider::after {
+    background: rgba(71, 85, 105, 0.5);
+}
+
+[data-theme="dark"] .login-link {
+    background: #1e293b;
+}
+
+[data-theme="dark"] .login-link p {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .login-link a {
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .security-note {
+    color: #34d399;
+}
+
 /* Responsive */
 @media (max-width: 991px) {
     .register-container {
@@ -576,21 +724,88 @@
         padding: 0;
         background: #fff;
     }
-    
+
     .register-container {
         border-radius: 0;
         box-shadow: none;
     }
-    
+
     .register-form-section {
         padding: 1.5rem;
     }
-    
+
     .form-header h3 {
         font-size: 1.3rem;
     }
+
+    [data-theme="dark"] .register-page {
+        background: #0f172a;
+    }
 }
 </style>
+
+<script>
+// Theme Toggle Functionality
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const registerPage = document.querySelector('.register-page');
+    const themeIcon = document.getElementById('themeIcon');
+
+    if (savedTheme === 'dark') {
+        registerPage.setAttribute('data-theme', 'dark');
+        registerPage.setAttribute('data-bs-theme', 'dark');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    }
+}
+
+function toggleTheme() {
+    const registerPage = document.querySelector('.register-page');
+    const themeIcon = document.getElementById('themeIcon');
+    const currentTheme = registerPage.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    registerPage.setAttribute('data-theme', newTheme);
+    registerPage.setAttribute('data-bs-theme', newTheme);
+
+    if (newTheme === 'dark') {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+    }
+
+    localStorage.setItem('theme', newTheme);
+
+    // Dispatch custom event for other components
+    window.dispatchEvent(new CustomEvent('themeChanged', {
+        detail: { theme: newTheme }
+    }));
+}
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
+
+    // Listen for theme changes from other components
+    window.addEventListener('themeChanged', function(e) {
+        const registerPage = document.querySelector('.register-page');
+        const themeIcon = document.getElementById('themeIcon');
+
+        registerPage.setAttribute('data-theme', e.detail.theme);
+        registerPage.setAttribute('data-bs-theme', e.detail.theme);
+
+        if (e.detail.theme === 'dark') {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        } else {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+    });
+});
+</script>
 @endsection
 
 

@@ -1,7 +1,58 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.theme-toggle i {
+    font-size: 1.2rem;
+    color: #2563EB;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(71, 85, 105, 0.3);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background: rgba(15, 23, 42, 0.95);
+}
+
+[data-theme="dark"] .theme-toggle i {
+    color: #fbbf24;
+}
+</style>
+@endpush
+
 @section('content')
 <div class="login-page" data-bs-theme="light">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
     <div class="login-container">
         {{-- Left Side - Branding --}}
         <div class="login-branding d-none d-lg-flex">
@@ -159,6 +210,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    transition: background 0.3s ease;
 }
 
 .login-container {
@@ -169,6 +221,119 @@
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .login-page {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+[data-theme="dark"] .login-container {
+    background: #0f172a;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Form Section Dark Mode */
+[data-theme="dark"] .login-form-section {
+    background: #0f172a;
+}
+
+[data-theme="dark"] .form-header h3 {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .form-header p {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .alert-box.error {
+    background: rgba(220, 38, 38, 0.1);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.2);
+}
+
+[data-theme="dark"] .login-form label {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .login-form label i {
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .login-form input[type="email"],
+[data-theme="dark"] .login-form input[type="password"] {
+    background: #1e293b;
+    border-color: rgba(71, 85, 105, 0.5);
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .login-form input:focus {
+    background: #334155;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+}
+
+[data-theme="dark"] .login-form input::placeholder {
+    color: #64748b;
+}
+
+[data-theme="dark"] .toggle-password {
+    color: #64748b;
+}
+
+[data-theme="dark"] .toggle-password:hover {
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .remember-me {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .btn-login {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="dark"] .btn-login:hover {
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+[data-theme="dark"] .divider {
+    color: #64748b;
+}
+
+[data-theme="dark"] .divider::before,
+[data-theme="dark"] .divider::after {
+    background: rgba(71, 85, 105, 0.5);
+}
+
+[data-theme="dark"] .register-link {
+    background: #1e293b;
+}
+
+[data-theme="dark"] .register-link p {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .register-link a {
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .register-link a:hover {
+    color: #3b82f6;
+}
+
+[data-theme="dark"] .security-note {
+    color: #34d399;
+}
+
+/* Mobile dark mode */
+@media (max-width: 576px) {
+    [data-theme="dark"] .login-page {
+        background: #0f172a;
+    }
 }
 
 /* Branding Section */
@@ -592,10 +757,50 @@
 </style>
 
 <script>
+// Theme Toggle Functionality
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const loginPage = document.querySelector('.login-page');
+    const themeIcon = document.getElementById('themeIcon');
+
+    if (savedTheme === 'dark') {
+        loginPage.setAttribute('data-theme', 'dark');
+        loginPage.setAttribute('data-bs-theme', 'dark');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    }
+}
+
+function toggleTheme() {
+    const loginPage = document.querySelector('.login-page');
+    const themeIcon = document.getElementById('themeIcon');
+    const currentTheme = loginPage.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    loginPage.setAttribute('data-theme', newTheme);
+    loginPage.setAttribute('data-bs-theme', newTheme);
+
+    if (newTheme === 'dark') {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+    }
+
+    localStorage.setItem('theme', newTheme);
+
+    // Dispatch custom event for other components
+    window.dispatchEvent(new CustomEvent('themeChanged', {
+        detail: { theme: newTheme }
+    }));
+}
+
+// Password Toggle
 function togglePassword() {
     const passwordInput = document.getElementById('password');
     const toggleIcon = document.getElementById('toggleIcon');
-    
+
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
         toggleIcon.classList.remove('fa-eye');
@@ -606,5 +811,27 @@ function togglePassword() {
         toggleIcon.classList.add('fa-eye');
     }
 }
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
+
+    // Listen for theme changes from other components
+    window.addEventListener('themeChanged', function(e) {
+        const loginPage = document.querySelector('.login-page');
+        const themeIcon = document.getElementById('themeIcon');
+
+        loginPage.setAttribute('data-theme', e.detail.theme);
+        loginPage.setAttribute('data-bs-theme', e.detail.theme);
+
+        if (e.detail.theme === 'dark') {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        } else {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+    });
+});
 </script>
 @endsection

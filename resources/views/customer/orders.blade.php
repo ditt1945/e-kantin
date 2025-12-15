@@ -38,7 +38,7 @@
                 'success' => '#B6CEB4',
                 'warning' => '#D9E9CF',
                 'primary' => '#96A78D',
-                'info' => '#87CEEB',
+                'info' => '#0EA5E9',
                 'danger' => '#6f7d63',
                 'secondary' => '#F0F0F0',
             ];
@@ -104,8 +104,8 @@
                                     </span>
                                 @elseif($payment->status === 'pending_cash')
                                     {{-- Cash payment pending --}}
-                                    <span class="badge bg-info py-2 px-3 d-flex align-items-center">
-                                        <i class="fas fa-money-bill-wave me-1"></i>Menunggu Pembayaran Tunai
+                                    <span class="badge bg-info py-2 px-3">
+                                        Menunggu Pembayaran Tunai
                                     </span>
                                     <a href="{{ route('payment.show', $order) }}" class="btn btn-sm btn-outline-info">
                                         <i class="fas fa-eye me-1"></i>Detail
@@ -170,6 +170,7 @@
     .order-border-success { border-left-color: #B6CEB4 !important; }
     .order-border-warning { border-left-color: #D9E9CF !important; }
     .order-border-primary { border-left-color: #96A78D !important; }
+    .order-border-info { border-left-color: #0EA5E9 !important; }
     .order-border-danger { border-left-color: #6f7d63 !important; }
     .order-border-secondary { border-left-color: #F0F0F0 !important; }
     

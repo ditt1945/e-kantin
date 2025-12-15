@@ -77,11 +77,13 @@
                         {{-- Image --}}
                         <div class="flex-shrink-0">
                             @if($menu->gambar)
-                                <img src="{{ asset('storage/' . $menu->gambar) }}" 
-                                     alt="{{ $menu->nama_menu }}" 
-                                     class="rounded menu-image">
+                                <img src="{{ asset('storage/' . $menu->gambar) }}"
+                                     alt="{{ $menu->nama_menu }}"
+                                     class="rounded menu-image"
+                                     style="width: 60px; height: 60px; object-fit: cover;">
                             @else
-                                <div class="menu-image-placeholder rounded d-flex align-items-center justify-content-center">
+                                <div class="menu-image-placeholder rounded d-flex align-items-center justify-content-center"
+                                     style="width: 60px; height: 60px; background: var(--light-gray);">
                                     <i class="fas fa-utensils text-muted"></i>
                                 </div>
                             @endif

@@ -9,10 +9,40 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('tenant')->paginate(20);
-        return view('admin.users.index', compact('users'));
+        $query = User::with('tenant')->latest();
+
+        // Search by name or email
+        if ($search = $request->get('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by role
+        if ($role = $request->get('role')) {
+            $query->where('role', $role);
+        }
+
+        // Filter by tenant
+        if ($tenantId = $request->get('tenant')) {
+            $query->where('tenant_id', $tenantId);
+        }
+
+        $users = $query->paginate(20)->withQueryString();
+
+        // Get counts for filters
+        $roleCounts = User::select('role', \DB::raw('count(*) as count'))
+            ->groupBy('role')
+            ->pluck('count', 'role');
+
+        $tenants = \App\Models\Tenant::where('is_active', true)
+            ->orderBy('nama_tenant')
+            ->get();
+
+        return view('admin.users.index', compact('users', 'roleCounts', 'tenants'));
     }
 
     public function update(Request $request, User $user)
@@ -23,7 +53,23 @@ class UserController extends Controller
             'role' => 'required|in:customer,tenant_owner,admin',
         ]);
 
+        // Log role change
+        $oldRole = $user->role;
+        $newRole = $request->role;
+
         $user->update($request->only(['name', 'email', 'role']));
+
+        // Special handling for tenant_owner role
+        if ($newRole === 'tenant_owner' && $oldRole !== 'tenant_owner') {
+            // If changing to tenant_owner, clear tenant_id if no tenant assigned
+            if (!$user->tenant_id) {
+                // You can add logic here to assign a tenant or require admin to assign one
+                return back()->with('warning', 'Role berhasil diubah ke Tenant, namun tenant belum ditugaskan. Silakan atur tenant melalui halaman kelola tenant.');
+            }
+        } elseif ($newRole !== 'tenant_owner' && $oldRole === 'tenant_owner') {
+            // If changing away from tenant_owner, clear tenant_id
+            $user->update(['tenant_id' => null]);
+        }
 
         return back()->with('success', 'User berhasil diperbarui.');
     }
@@ -36,5 +82,32 @@ class UserController extends Controller
 
         $user->delete();
         return back()->with('success', 'User berhasil dihapus.');
+    }
+
+    public function checkRole(Request $request)
+    {
+        $email = $request->get('email');
+
+        if (!$email) {
+            return response()->json(['error' => 'Email diperlukan'], 400);
+        }
+
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'User tidak ditemukan'], 404);
+        }
+
+        return response()->json([
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'tenant' => $user->tenant ? [
+                'id' => $user->tenant->id,
+                'nama_tenant' => $user->tenant->nama_tenant
+            ] : null,
+            'tenant_id' => $user->tenant_id,
+            'created_at' => $user->created_at->format('Y-m-d H:i:s')
+        ]);
     }
 }

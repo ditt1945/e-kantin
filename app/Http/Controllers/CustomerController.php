@@ -23,7 +23,9 @@ class CustomerController extends Controller
 {
     public function showTenants()
     {
-        $tenants = Tenant::withCount('menus')->where('is_active', true)->get();
+        $tenants = Tenant::withCount('menus')
+            ->where('is_active', true)
+            ->paginate(9); // Show 9 tenants per page (3x3 grid)
         return view('customer.tenants', compact('tenants'));
     }
 
@@ -32,8 +34,8 @@ class CustomerController extends Controller
         $menus = $tenant->menus()
             ->with('category')
             ->where('is_available', true)
-            ->get();
-            
+            ->paginate(12); // Show 12 menus per page
+
         return view('customer.menus', compact('tenant', 'menus'));
     }
 
@@ -158,6 +160,17 @@ class CustomerController extends Controller
 
         if ($cart->items->isEmpty()) {
             return back()->with('error', 'Keranjang kosong.');
+        }
+
+        // Validasi stok sebelum checkout
+        foreach ($cart->items as $item) {
+            $menu = $item->menu;
+            if (!$menu) {
+                return back()->with('error', "Menu tidak ditemukan!");
+            }
+            if ($menu->stok < $item->quantity) {
+                return back()->with('error', "Stok {$menu->nama_menu} tidak cukup! Tersedia: {$menu->stok}");
+            }
         }
 
         try {
@@ -358,7 +371,7 @@ class CustomerController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $orders = $user->orders()->with('tenant', 'orderItems.menu', 'payment')->latest()->get();
+        $orders = $user->orders()->with('tenant', 'orderItems.menu', 'payment')->latest()->paginate(10);
         
         // Auto-check payment status for pending payments from Midtrans
         foreach ($orders as $order) {
