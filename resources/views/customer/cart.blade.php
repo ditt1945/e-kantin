@@ -19,12 +19,12 @@
     </div>
 
     {{-- Flash messages --}}
-    @if(session('success'))
+    <!-- @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+    @endif -->
 
     {{-- Stock warnings after auto-sync --}}
     @if(!empty($stockWarnings))
@@ -75,11 +75,27 @@
                                     <form action="{{ route('customer.update_cart_item', $item) }}" method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <input type="number" name="quantity" value="{{ $item->quantity }}"
-                                            min="1" max="{{ max(1, $availableStock) }}"
-                                            class="form-control form-control-sm text-center fw-semibold"
-                                            style="width: 56px;"
-                                            @if($availableStock === 0) readonly @endif>
+                                        <input 
+    type="number" 
+    name="quantity" 
+    value="{{ $item->quantity }}"
+    min="1" 
+    max="{{ max(1, $availableStock) }}"
+    class="text-center fw-semibold"
+    @if($availableStock === 0) readonly @endif
+    style="
+        width: 60px;
+        padding: 6px 8px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.2s ease;
+    "
+>
+
                                     </form>
                                     <form action="{{ route('customer.remove_cart_item', $item) }}" method="POST" onsubmit="return confirm('Hapus?')">
                                         @csrf
