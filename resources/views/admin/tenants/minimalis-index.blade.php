@@ -1,37 +1,9 @@
 @extends('layouts.app')
 
-@push('styles')
-@include('partials.admin-professional-styles')
-@endpush
-
-@push('styles')
 @include('partials.admin-minimalis-styles')
-@endpush
 
 @section('content')
 <div class="admin-container">
-    <!-- Professional Admin Header - Inside content area -->
-    <div class="admin-header" style="background: var(--bg-primary); border-bottom: 1px solid var(--border); padding: 1rem; margin-bottom: 2rem; border-radius: var(--radius-lg);">
-        <div class="admin-header-left">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-                <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" style="width: 40px; height: 40px; border-radius: var(--radius-md);">
-                <h1 class="admin-title">
-                    <i class="fas fa-store"></i>
-                    Kelola Tenant
-                </h1>
-            </div>
-            <p class="admin-subtitle">
-                <i class="far fa-calendar-alt"></i>
-                {{ now()->translatedFormat('l, d F Y') }} • Pantau Seluruh Kantin SMKN 2 Surabaya
-            </p>
-        </div>
-        <div class="admin-header-right">
-            <a href="{{ route('tenants.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i>
-                Tambah Tenant
-            </a>
-        </div>
-    </div>
     @php
         $hour = now()->format('H');
         if ($hour < 12) {
@@ -44,6 +16,23 @@
             $greeting = 'Selamat Malam';
         }
     @endphp
+
+    {{-- ===== PAGE HEADER ===== --}}
+    <div class="admin-hero">
+        <div class="content">
+            <div style="display: flex; align-items: center; gap: var(--space-md);">
+                <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" style="width: 48px; height: 48px; border-radius: var(--radius-md);">
+                <div>
+                    <h1 class="hero-title">Kelola Tenant</h1>
+                    <p class="hero-subtitle">{{ $greeting }}, Admin. Pantau seluruh kantin yang terdaftar di platform.</p>
+                </div>
+            </div>
+            <div class="time-badge">
+                <i class="fas fa-store"></i>
+                {{ $tenants->count() }} Total
+            </div>
+        </div>
+    </div>
 
     {{-- ===== STATISTICS ===== --}}
     <div class="admin-stats">
@@ -135,22 +124,15 @@
                         <th>Nama Tenant</th>
                         <th>Pemilik</th>
                         <th>Kontak</th>
-                        <th>Email</th>
                         <th>Status</th>
                         <th>Menu</th>
-                        <th>Total Penjualan</th>
-                        <th>Tanggal Bergabung</th>
+                        <th>Pesanan</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($tenants as $tenant)
-                        <tr class="tenant-row"
-                            data-name="{{ $tenant->nama_tenant }}"
-                            data-owner="{{ $tenant->pemilik ?? '' }}"
-                            data-email="{{ $tenant->email ?? '' }}"
-                            data-phone="{{ $tenant->no_telepon ?? '' }}"
-                            data-description="{{ $tenant->deskripsi ?? '' }}">
+                        <tr class="tenant-row" data-name="{{ $tenant->nama_tenant }}" data-owner="{{ $tenant->pemilik ?? '' }}">
                             <td>
                                 <div style="display: flex; align-items: center; gap: var(--space-sm);">
                                     <div class="avatar" style="background: var(--success);">
@@ -158,69 +140,26 @@
                                     </div>
                                     <div>
                                         <strong>{{ $tenant->nama_tenant }}</strong>
-                                        @if($tenant->deskripsi)
-                                            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
-                                                {{ Str::limit($tenant->deskripsi, 50) }}
-                                            </div>
-                                        @endif
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <strong>{{ $tenant->pemilik ?? '-' }}</strong>
-                            </td>
-                            <td>
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    @if($tenant->no_telepon)
-                                        <span>{{ $tenant->no_telepon }}</span>
-                                    @endif
-                                    @if($tenant->no_wa)
-                                        <span style="font-size: 0.75rem; color: var(--success);">
-                                            <i class="fab fa-whatsapp"></i> {{ $tenant->no_wa }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>
-                                <span style="font-size: 0.875rem;">{{ $tenant->email ?? '-' }}</span>
-                            </td>
+                            <td>{{ $tenant->pemilik ?? '-' }}</td>
+                            <td>{{ $tenant->no_telepon ?? '-' }}</td>
                             <td>
                                 <span class="badge badge-{{ $tenant->is_active ? 'success' : 'neutral' }}">
                                     {{ $tenant->is_active ? 'Aktif' : 'Nonaktif' }}
                                 </span>
                             </td>
                             <td>
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                                        <span class="badge badge-primary">{{ $tenant->menus_count ?? 0 }}</span>
-                                        <span style="color: var(--text-secondary); font-size: 0.75rem;">total menu</span>
-                                    </div>
-                                    @if($tenant->menus_count > 0)
-                                        <div style="font-size: 0.75rem; color: var(--text-secondary);">
-                                            {{ $tenant->menus_active_count ?? $tenant->menus_count }} tersedia
-                                        </div>
-                                    @endif
+                                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                                    <span class="badge badge-primary">{{ $tenant->menus_count }}</span>
+                                    <span style="color: var(--text-secondary); font-size: 0.75rem;">menu</span>
                                 </div>
                             </td>
                             <td>
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                                        <span class="badge badge-neutral">{{ $tenant->orders_count ?? 0 }}</span>
-                                        <span style="color: var(--text-secondary); font-size: 0.75rem;">total pesanan</span>
-                                    </div>
-                                    @if($tenant->orders_count > 0)
-                                        <div style="font-size: 0.75rem; color: var(--text-secondary);">
-                                            Rp {{ number_format($tenant->total_sales ?? 0, 0, ',', '.') }}
-                                        </div>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 0.875rem;">{{ $tenant->created_at->format('d M Y') }}</span>
-                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">
-                                        {{ $tenant->created_at->diffForHumans() }}
-                                    </span>
+                                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                                    <span class="badge badge-neutral">{{ $tenant->orders_count }}</span>
+                                    <span style="color: var(--text-secondary); font-size: 0.75rem;">pesanan</span>
                                 </div>
                             </td>
                             <td>
@@ -271,15 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
             let visibleCount = 0;
 
             tableRows.forEach(row => {
-                const name = (row.dataset.name || '').toLowerCase();
-                const owner = (row.dataset.owner || '').toLowerCase();
-                const email = (row.dataset.email || '').toLowerCase();
-                const phone = (row.dataset.phone || '').toLowerCase();
-                const description = (row.dataset.description || '').toLowerCase();
-
-                const allText = name + ' ' + owner + ' ' + email + ' ' + phone + ' ' + description;
-
-                if (allText.includes(searchTerm)) {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
                     row.style.display = '';
                     visibleCount++;
                 } else {

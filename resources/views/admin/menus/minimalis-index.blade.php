@@ -1,37 +1,9 @@
 @extends('layouts.app')
 
-@push('styles')
-@include('partials.admin-professional-styles')
-@endpush
-
-@push('styles')
 @include('partials.admin-minimalis-styles')
-@endpush
 
 @section('content')
 <div class="admin-container">
-    <!-- Professional Admin Header - Inside content area -->
-    <div class="admin-header" style="background: var(--bg-primary); border-bottom: 1px solid var(--border); padding: 1rem; margin-bottom: 2rem; border-radius: var(--radius-lg);">
-        <div class="admin-header-left">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-                <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" style="width: 40px; height: 40px; border-radius: var(--radius-md);">
-                <h1 class="admin-title">
-                    <i class="fas fa-utensils"></i>
-                    Kelola Menu
-                </h1>
-            </div>
-            <p class="admin-subtitle">
-                <i class="far fa-calendar-alt"></i>
-                {{ now()->translatedFormat('l, d F Y') }} • Pantau Seluruh Menu SMKN 2 Surabaya
-            </p>
-        </div>
-        <div class="admin-header-right">
-            <a href="{{ route('menus.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i>
-                Tambah Menu
-            </a>
-        </div>
-    </div>
     @php
         $hour = now()->format('H');
         if ($hour < 12) {
@@ -44,6 +16,23 @@
             $greeting = 'Selamat Malam';
         }
     @endphp
+
+    {{-- ===== PAGE HEADER ===== --}}
+    <div class="admin-hero">
+        <div class="content">
+            <div style="display: flex; align-items: center; gap: var(--space-md);">
+                <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" style="width: 48px; height: 48px; border-radius: var(--radius-md);">
+                <div>
+                    <h1 class="hero-title">Kelola Menu</h1>
+                    <p class="hero-subtitle">{{ $greeting }}, Admin. Pantau seluruh menu yang tersedia di platform.</p>
+                </div>
+            </div>
+            <div class="time-badge">
+                <i class="fas fa-utensils"></i>
+                {{ $menus->count() }} Total
+            </div>
+        </div>
+    </div>
 
     {{-- ===== STATISTICS ===== --}}
     <div class="admin-stats">

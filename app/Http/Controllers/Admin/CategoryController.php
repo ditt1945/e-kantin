@@ -15,6 +15,11 @@ class CategoryController extends Controller
         return view('admin.categories.index', compact('categories'));
     }
 
+    public function create()
+    {
+        return view('admin.categories.create');
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -39,6 +44,11 @@ class CategoryController extends Controller
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
+    public function edit(Category $category)
+    {
+        return view('admin.categories.edit', compact('category'));
+    }
+
     public function destroy(Category $category)
     {
         if ($category->menus()->exists()) {
@@ -48,5 +58,35 @@ class CategoryController extends Controller
         $category->delete();
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus.');
+    }
+
+    public function export()
+    {
+        $categories = Category::withCount('menus')->get();
+
+        $filename = 'categories_export_' . date('Y-m-d_H-i-s') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function() use ($categories) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, ['Nama Kategori', 'Deskripsi', 'Status', 'Jumlah Menu']);
+
+            foreach ($categories as $category) {
+                fputcsv($file, [
+                    $category->nama_kategori,
+                    $category->deskripsi ?: '-',
+                    $category->is_active ? 'Aktif' : 'Nonaktif',
+                    $category->menus_count
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

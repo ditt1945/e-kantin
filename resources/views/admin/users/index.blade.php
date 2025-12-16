@@ -1,96 +1,86 @@
 @extends('layouts.app')
 
-@include('partials.admin-styles')
+@push('styles')
+@include('partials.admin-professional-styles')
+@endpush
+
+@push('styles')
+@include('partials.admin-minimalis-styles')
+@endpush
 
 @section('content')
-<div class="container-fluid py-3">
-    <!-- Page Header -->
-    <div class="admin-page-header">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1 class="admin-page-title">
-                    <i class="fas fa-users me-2"></i>Kelola Pengguna
+<div class="admin-container">
+    <!-- Professional Admin Header - Inside content area -->
+    <div class="admin-header" style="background: var(--bg-primary); border-bottom: 1px solid var(--border); padding: 1rem; margin-bottom: 2rem; border-radius: var(--radius-lg);">
+        <div class="admin-header-left">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" style="width: 40px; height: 40px; border-radius: var(--radius-md);">
+                <h1 class="admin-title">
+                    <i class="fas fa-users"></i>
+                    Kelola Pengguna
                 </h1>
-                <p class="admin-page-subtitle">Kelola semua pengguna sistem e-Kantin</p>
             </div>
-            <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                <div class="admin-action-bar justify-content-md-end">
-                    <button type="button" class="admin-action-btn btn-info" data-bs-toggle="modal" data-bs-target="#checkRoleModal">
-                        <i class="fas fa-search"></i>
-                        <span>Cek Role</span>
-                    </button>
-                    <a href="{{ route('dashboard') }}" class="admin-action-btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>Kembali</span>
-                    </a>
-                </div>
-            </div>
+            <p class="admin-subtitle">
+                <i class="far fa-calendar-alt"></i>
+                {{ now()->translatedFormat('l, d F Y') }} • Kelola Pengguna Sistem e-Kantin SMKN 2 Surabaya
+            </p>
+        </div>
+        <div class="admin-header-right">
+            <a href="{{ route('users.create') }}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i>
+                Tambah Pengguna
+            </a>
         </div>
     </div>
 
-    <!-- Alert Messages -->
-    @if(session('success'))
-        <div class="admin-alert admin-alert-success">
-            <i class="fas fa-check-circle"></i>
-            <span>{{ session('success') }}</span>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    {{-- ===== STATISTICS ===== --}}
+    <div class="admin-stats">
+        <div class="admin-stat-card">
+            <div class="admin-stat-value">{{ $roleCounts->get('customer', 0) }}</div>
+            <div class="admin-stat-label">Customers</div>
+            <div class="admin-stat-change">Registered users</div>
         </div>
-    @endif
-    @if(session('warning'))
-        <div class="admin-alert admin-alert-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span>{{ session('warning') }}</span>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        <div class="admin-stat-card">
+            <div class="admin-stat-value">{{ $roleCounts->get('tenant_owner', 0) }}</div>
+            <div class="admin-stat-label">Tenants</div>
+            <div class="admin-stat-change">Store owners</div>
         </div>
-    @endif
-    @if(session('error'))
-        <div class="admin-alert admin-alert-danger">
-            <i class="fas fa-times-circle"></i>
-            <span>{{ session('error') }}</span>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        <div class="admin-stat-card">
+            <div class="admin-stat-value">{{ $roleCounts->get('admin', 0) }}</div>
+            <div class="admin-stat-label">Admins</div>
+            <div class="admin-stat-change">System admins</div>
         </div>
-    @endif
-
-    <!-- Statistics -->
-    <div class="admin-stats-row">
-        <div class="admin-stats-card">
-            <h5 class="text-primary mb-1">{{ $roleCounts->get('customer', 0) }}</h5>
-            <h6 class="text-muted">Customers</h6>
-        </div>
-        <div class="admin-stats-card">
-            <h5 class="text-warning mb-1">{{ $roleCounts->get('tenant_owner', 0) }}</h5>
-            <h6 class="text-muted">Tenants</h6>
-        </div>
-        <div class="admin-stats-card">
-            <h5 class="text-danger mb-1">{{ $roleCounts->get('admin', 0) }}</h5>
-            <h6 class="text-muted">Admins</h6>
-        </div>
-        <div class="admin-stats-card">
-            <h5 class="text-info mb-1">{{ $users->total() }}</h5>
-            <h6 class="text-muted">Total Users</h6>
+        <div class="admin-stat-card">
+            <div class="admin-stat-value">{{ $users->total() }}</div>
+            <div class="admin-stat-label">All Users</div>
+            <div class="admin-stat-change">Total registered</div>
         </div>
     </div>
 
-    <!-- Search and Filter -->
-    <div class="admin-search-filter">
-        <form method="GET" action="{{ route('users.index') }}">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="admin-form-label">Cari User</label>
-                    <input type="text" class="admin-form-control" name="search" placeholder="Masukkan nama atau email..." value="{{ request('search') }}">
+    {{-- ===== FILTERS ===== --}}
+    <div class="admin-filter">
+        <div class="admin-filter-title">
+            <i class="fas fa-filter"></i>
+            Filter Pengguna
+        </div>
+        <form method="GET">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+                <div>
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">Cari Pengguna</label>
+                    <input type="text" name="search" class="form-control" placeholder="Masukkan nama atau email..." value="{{ request('search') }}">
                 </div>
-                <div class="col-md-2">
-                    <label class="admin-form-label">Role</label>
-                    <select class="admin-form-control" name="role">
+                <div>
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">Role</label>
+                    <select name="role" class="form-control">
                         <option value="">Semua Role</option>
                         <option value="customer" {{ request('role') == 'customer' ? 'selected' : '' }}>Customer ({{ $roleCounts->get('customer', 0) }})</option>
                         <option value="tenant_owner" {{ request('role') == 'tenant_owner' ? 'selected' : '' }}>Tenant ({{ $roleCounts->get('tenant_owner', 0) }})</option>
                         <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin ({{ $roleCounts->get('admin', 0) }})</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <label class="admin-form-label">Tenant</label>
-                    <select class="admin-form-control" name="tenant">
+                <div>
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">Tenant</label>
+                    <select name="tenant" class="form-control">
                         <option value="">Semua Tenant</option>
                         @foreach($tenants as $tenant)
                             <option value="{{ $tenant->id }}" {{ request('tenant') == $tenant->id ? 'selected' : '' }}>
@@ -99,170 +89,126 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="admin-form-label">&nbsp;</label>
-                    <div class="admin-action-bar">
-                        <button type="submit" class="admin-action-btn btn-primary">
-                            <i class="fas fa-filter"></i>
-                            <span>Filter</span>
-                        </button>
-                        <a href="{{ route('users.index') }}" class="admin-action-btn btn-outline-secondary">
-                            <i class="fas fa-sync"></i>
-                            <span>Reset</span>
-                        </a>
-                    </div>
-                </div>
+            </div>
+            <div class="admin-action-bar" style="margin-top: var(--space-md);">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i>
+                    Filter
+                </button>
+                <a href="{{ route('users.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i>
+                    Reset
+                </a>
+                <button type="button" class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    Cetak
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#checkRoleModal">
+                    <i class="fas fa-search"></i>
+                    Cek Role
+                </button>
             </div>
         </form>
     </div>
 
-    <!-- Desktop Table -->
-    <div class="admin-data-table d-none d-lg-block">
-        @if($users->count() > 0)
-        <table class="table">
-            <thead class="table-light">
-                <tr>
-                    <th>Nama</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Tenant</th>
-                    <th>Tenant ID</th>
-                    <th>Bergabung</th>
-                    <th width="120">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($users as $user)
-                <tr>
-                    <td class="fw-semibold">
-                        {{ $user->name }}
-                        @if($user->id == auth()->id())
-                            <span class="badge bg-info ms-2">You</span>
-                        @endif
-                    </td>
-                    <td class="text-muted">{{ $user->email }}</td>
-                    <td>
-                        <form method="POST" action="{{ route('users.update', $user) }}" class="d-inline">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="name" value="{{ $user->name }}">
-                            <input type="hidden" name="email" value="{{ $user->email }}">
-                            <select name="role" class="form-select form-select-sm" style="width: auto;"
-                                    @if($user->id == auth()->id()) disabled @endif
-                                    onchange="if(confirm('Ubah role user {{ $user->name }}?')) this.form.submit()">
-                                <option value="customer" {{ $user->role === 'customer' ? 'selected' : '' }}>
-                                    🛒 Customer
-                                </option>
-                                <option value="tenant_owner" {{ $user->role === 'tenant_owner' ? 'selected' : '' }}>
-                                    🏢 Tenant Owner
-                                </option>
-                                <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>
-                                    👤 Admin
-                                </option>
-                            </select>
-                            @if($user->id == auth()->id())
-                                <input type="hidden" name="role" value="{{ $user->role }}">
-                            @endif
-                        </form>
-                    </td>
-                    <td class="text-muted">{{ $user->tenant->nama_tenant ?? '-' }}</td>
-                    <td class="text-muted">{{ $user->tenant_id ?? '-' }}</td>
-                    <td class="text-muted">{{ $user->created_at->format('d M Y') }}</td>
-                    <td class="text-center">
-                        @if($user->role !== 'admin' && $user->id != auth()->id())
-                            <form method="POST" action="{{ route('users.destroy', $user) }}" class="d-inline" onsubmit="return confirm('Yakin hapus user ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus user">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        @endif
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="d-flex justify-content-center mt-3">
-            {{ $users->links() }}
+    {{-- ===== USERS TABLE ===== --}}
+    <div class="admin-table-container">
+        <div class="admin-table-header">
+            <div class="admin-table-title">
+                <i class="fas fa-users"></i>
+                Data Pengguna
+            </div>
+            <div class="admin-table-search">
+                <input type="text" placeholder="Cari nama, email..." id="userSearch">
+                <i class="fas fa-search"></i>
+            </div>
         </div>
-        @else
-        <div class="text-center py-5">
-            <i class="fas fa-users fa-3x text-muted mb-2"></i>
-            <h5 class="text-muted">Belum ada pengguna</h5>
-            <p class="text-muted mb-0">Pengguna akan muncul setelah registrasi.</p>
-        </div>
-        @endif
-    </div>
 
-    <!-- Mobile Cards -->
-    <div class="d-lg-none">
-        @forelse($users as $user)
-            @php
-                $roleColor = match($user->role) {
-                    'admin' => 'danger',
-                    'tenant_owner' => 'warning',
-                    default => 'primary',
-                };
-            @endphp
-            <div class="card mb-2 border-start border-3 border-{{ $roleColor }}">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <h6 class="mb-0 fw-bold">
-                                {{ $user->name }}
-                                @if($user->id == auth()->id())
-                                    <span class="badge bg-info ms-2">You</span>
-                                @endif
-                            </h6>
-                            <small class="text-muted">{{ $user->email }}</small>
-                        </div>
-                        <span class="badge bg-{{ $roleColor }}">{{ ucfirst($user->role) }}</span>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-                        @if($user->tenant)
-                            <small class="text-muted"><i class="fas fa-store me-1"></i>{{ $user->tenant->nama_tenant }}</small>
-                        @endif
-                        <small class="text-muted"><i class="fas fa-calendar me-1"></i>{{ $user->created_at->format('d M Y') }}</small>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-                        <form method="POST" action="{{ route('users.update', $user) }}" class="d-inline">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="name" value="{{ $user->name }}">
-                            <input type="hidden" name="email" value="{{ $user->email }}">
-                            <select name="role" class="form-select form-select-sm" style="width: auto; font-size: 0.8rem;"
-                                    @if($user->id == auth()->id()) disabled @endif
-                                    onchange="if(confirm('Ubah role user {{ $user->name }}?')) this.form.submit()">
-                                <option value="customer" {{ $user->role === 'customer' ? 'selected' : '' }}>Customer</option>
-                                <option value="tenant_owner" {{ $user->role === 'tenant_owner' ? 'selected' : '' }}>Tenant</option>
-                                <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
-                            </select>
-                            @if($user->id == auth()->id())
-                                <input type="hidden" name="role" value="{{ $user->role }}">
-                            @endif
-                        </form>
-                        @if($user->role !== 'admin' && $user->id != auth()->id())
-                            <form method="POST" action="{{ route('users.destroy', $user) }}" class="d-inline" onsubmit="return confirm('Yakin hapus?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        @endif
-                    </div>
+        @if($users->count() > 0)
+            <table class="admin-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Tenant</th>
+                        <th>Bergabung</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($users as $user)
+                        <tr class="user-row" data-name="{{ $user->name }}" data-email="{{ $user->email }}" data-role="{{ $user->role }}">
+                            <td>
+                                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                                    <div class="avatar" style="background: var(--primary);">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <strong>{{ $user->name }}</strong>
+                                        @if($user->id == auth()->id())
+                                            <span class="badge badge-success">You</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ $user->email }}</td>
+                            <td>
+                                <form method="POST" action="{{ route('users.update', $user) }}" style="display: inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="name" value="{{ $user->name }}">
+                                    <input type="hidden" name="email" value="{{ $user->email }}">
+                                    <select name="role" class="form-control" style="width: auto;"
+                                            @if($user->id == auth()->id()) disabled @endif
+                                            onchange="if(confirm('Ubah role user {{ $user->name }}?')) this.form.submit()">
+                                        <option value="customer" {{ $user->role === 'customer' ? 'selected' : '' }}>
+                                            🛒 Customer
+                                        </option>
+                                        <option value="tenant_owner" {{ $user->role === 'tenant_owner' ? 'selected' : '' }}>
+                                            🏢 Tenant
+                                        </option>
+                                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>
+                                            👤 Admin
+                                        </option>
+                                    </select>
+                                    @if($user->id == auth()->id())
+                                        <input type="hidden" name="role" value="{{ $user->role }}">
+                                    @endif
+                                </form>
+                            </td>
+                            <td>{{ $user->tenant->nama_tenant ?? '-' }}</td>
+                            <td>{{ $user->created_at->format('d M Y') }}</td>
+                            <td>
+                                <div style="display: flex; gap: var(--space-xs); justify-content: flex-end;">
+                                    @if($user->role !== 'admin' && $user->id != auth()->id())
+                                        <form action="{{ route('users.destroy', $user) }}" method="POST" style="display: inline;" onsubmit="return confirm('Hapus user ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Hapus user">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            @if($users->hasPages())
+                <div style="padding: var(--space-lg); display: flex; justify-content: center;">
+                    {{ $users->links() }}
                 </div>
+            @endif
+        @else
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <div class="empty-state-title">Belum Ada Pengguna</div>
+                <div class="empty-state-text">Pengguna akan muncul setelah registrasi</div>
             </div>
-        @empty
-            <div class="text-center py-5">
-                <i class="fas fa-users fa-3x text-muted mb-2"></i>
-                <h5 class="text-muted">Belum ada pengguna</h5>
-            </div>
-        @endforelse
-        <div class="admin-pagination mt-3">
-            {{ $users->links() }}
-        </div>
+        @endif
     </div>
 </div>
 
@@ -294,10 +240,31 @@
     </div>
 </div>
 
-
-@push('scripts')
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Real-time search functionality
+    const searchInput = document.getElementById('userSearch');
+    const tableRows = document.querySelectorAll('#usersTable tbody .user-row');
+
+    if (searchInput && tableRows.length > 0) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Check Role functionality
     const btnCheckRole = document.getElementById('btnCheckRole');
     const checkEmail = document.getElementById('checkEmail');
     const roleResult = document.getElementById('roleResult');
@@ -310,10 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        btnCheckRole.disabled = true;
-        btnCheckRole.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
-
-        fetch('{{ route("users.check-role") }}', {
+        fetch(`/users/check-role`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -323,79 +287,36 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            btnCheckRole.disabled = false;
-            btnCheckRole.innerHTML = '<i class="fas fa-search"></i> Cek';
+            roleResult.classList.remove('d-none');
 
-            if (data.error) {
+            if (data.success) {
                 roleResult.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        ${data.error}
+                    <div class="alert alert-success">
+                        <strong>Role ditemukan!</strong><br>
+                        Email: ${data.email}<br>
+                        Role: ${data.role}<br>
+                        Nama: ${data.name}<br>
+                        Tenant: ${data.tenant ?? 'Tidak ada'}
                     </div>
                 `;
             } else {
-                let roleBadge = '';
-                switch(data.role) {
-                    case 'admin':
-                        roleBadge = '<span class="badge bg-danger">Admin</span>';
-                        break;
-                    case 'tenant_owner':
-                        roleBadge = '<span class="badge bg-warning">Tenant Owner</span>';
-                        break;
-                    default:
-                        roleBadge = '<span class="badge bg-primary">Customer</span>';
-                }
-
                 roleResult.innerHTML = `
-                    <div class="alert alert-success">
-                        <h6>Informasi User:</h6>
-                        <table class="table table-sm table-borderless mb-0">
-                            <tr>
-                                <td><strong>Nama:</strong></td>
-                                <td>${data.name}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Email:</strong></td>
-                                <td>${data.email}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Role:</strong></td>
-                                <td>${roleBadge}</td>
-                            </tr>
-                            ${data.tenant ? `
-                            <tr>
-                                <td><strong>Tenant:</strong></td>
-                                <td>${data.tenant.nama_tenant} (ID: ${data.tenant.id})</td>
-                            </tr>
-                            ` : ''}
-                            <tr>
-                                <td><strong>Tenant ID:</strong></td>
-                                <td>${data.tenant_id || 'Tidak ada'}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Bergabung:</strong></td>
-                                <td>${data.created_at}</td>
-                            </tr>
-                        </table>
+                    <div class="alert alert-danger">
+                        User tidak ditemukan
                     </div>
                 `;
             }
-            roleResult.classList.remove('d-none');
         })
         .catch(error => {
-            btnCheckRole.disabled = false;
-            btnCheckRole.innerHTML = '<i class="fas fa-search"></i> Cek';
+            roleResult.classList.remove('d-none');
             roleResult.innerHTML = `
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Terjadi kesalahan: ${error.message}
+                    Terjadi kesalahan saat mencari user
                 </div>
             `;
-            roleResult.classList.remove('d-none');
         });
     });
 
-    // Enter key support for email input
     checkEmail.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             btnCheckRole.click();
@@ -403,5 +324,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endpush
 @endsection

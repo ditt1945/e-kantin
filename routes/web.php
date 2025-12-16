@@ -68,18 +68,32 @@ Route::middleware('auth')->group(function () {
         Route::get('/tenants/{tenant}/edit', [AdminTenantController::class, 'edit'])->name('tenants.edit');
         Route::put('/tenants/{tenant}', [AdminTenantController::class, 'update'])->name('tenants.update');
         Route::delete('/tenants/{tenant}', [AdminTenantController::class, 'destroy'])->name('tenants.destroy');
+        Route::get('/tenants/export', [AdminTenantController::class, 'export'])->name('tenants.export');
 
         Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
+        Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
         Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
+        Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
         Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
         Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
+        Route::get('/categories/export', [AdminCategoryController::class, 'export'])->name('categories.export');
 
         Route::get('/menus', [AdminMenuController::class, 'index'])->name('menus.index');
+        Route::get('/menus/create', [AdminMenuController::class, 'create'])->name('menus.create');
+        Route::post('/menus', [AdminMenuController::class, 'store'])->name('menus.store');
+        Route::get('/menus/{menu}/edit', [AdminMenuController::class, 'edit'])->name('menus.edit');
+        Route::put('/menus/{menu}', [AdminMenuController::class, 'update'])->name('menus.update');
+        Route::delete('/menus/{menu}', [AdminMenuController::class, 'destroy'])->name('menus.destroy');
+        Route::get('/menus/export', [AdminMenuController::class, 'export'])->name('menus.export');
 
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+        Route::get('/orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
 
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
         Route::post('/users/check-role', [AdminUserController::class, 'checkRole'])->name('users.check-role');
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');

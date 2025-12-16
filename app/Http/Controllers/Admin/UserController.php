@@ -45,6 +45,37 @@ class UserController extends Controller
         return view('admin.users.index', compact('users', 'roleCounts', 'tenants'));
     }
 
+    public function create()
+    {
+        $tenants = \App\Models\Tenant::where('is_active', true)
+            ->orderBy('nama_tenant')
+            ->get();
+
+        return view('admin.users.create', compact('tenants'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:customer,tenant_owner,admin',
+            'tenant_id' => 'nullable|exists:tenants,id',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'tenant_id' => $request->role === 'tenant_owner' ? $request->tenant_id : null,
+            'email_verified_at' => now(),
+        ]);
+
+        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
+    }
+
     public function update(Request $request, User $user)
     {
         $request->validate([

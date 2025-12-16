@@ -1,35 +1,36 @@
-@extends('layouts.app')
+<!-- @extends('layouts.app')
 
-@push('styles')
-@include('partials.admin-professional-styles')
-@endpush
-
-@push('styles')
 @include('partials.admin-minimalis-styles')
-@endpush
 
 @section('content')
 <div class="admin-container">
-    <!-- Professional Admin Header - Inside content area -->
-    <div class="admin-header" style="background: var(--bg-primary); border-bottom: 1px solid var(--border); padding: 1rem; margin-bottom: 2rem; border-radius: var(--radius-lg);">
-        <div class="admin-header-left">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-                <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" style="width: 40px; height: 40px; border-radius: var(--radius-md);">
-                <h1 class="admin-title">
-                    <i class="fas fa-tags"></i>
-                    Kelola Kategori
-                </h1>
+    @php
+        $hour = now()->format('H');
+        if ($hour < 12) {
+            $greeting = 'Selamat Pagi';
+        } elseif ($hour < 15) {
+            $greeting = 'Selamat Siang';
+        } elseif ($hour < 18) {
+            $greeting = 'Selamat Sore';
+        } else {
+            $greeting = 'Selamat Malam';
+        }
+    @endphp
+
+    {{-- ===== PAGE HEADER ===== --}}
+    <div class="admin-hero">
+        <div class="content">
+            <div style="display: flex; align-items: center; gap: var(--space-md);">
+                <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" style="width: 48px; height: 48px; border-radius: var(--radius-md);">
+                <div>
+                    <h1 class="hero-title">Kelola Kategori</h1>
+                    <p class="hero-subtitle">{{ $greeting }}, Admin. Kelola kategori untuk mengelompokkan menu.</p>
+                </div>
             </div>
-            <p class="admin-subtitle">
-                <i class="far fa-calendar-alt"></i>
-                {{ now()->translatedFormat('l, d F Y') }} • Kelola Kategori Menu SMKN 2 Surabaya
-            </p>
-        </div>
-        <div class="admin-header-right">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
-                <i class="fas fa-plus"></i>
-                Tambah Kategori
-            </button>
+            <div class="time-badge">
+                <i class="fas fa-tags"></i>
+                {{ $categories->count() }} Total
+            </div>
         </div>
     </div>
 
@@ -311,4 +312,4 @@ function editCategory(id, nama, deskripsi, isActive) {
     new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
 }
 </script>
-@endsection
+@endsection -->

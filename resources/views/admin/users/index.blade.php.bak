@@ -1,0 +1,467 @@
+@extends('layouts.app')
+
+@include('partials.admin-minimalis-styles')
+
+@section('content')
+<div class="admin-container">
+    @php
+        $hour = now()->format('H');
+        if ($hour < 12) {
+            $greeting = 'Selamat Pagi';
+        } elseif ($hour < 15) {
+            $greeting = 'Selamat Siang';
+        } elseif ($hour < 18) {
+            $greeting = 'Selamat Sore';
+        } else {
+            $greeting = 'Selamat Malam';
+        }
+    @endphp
+
+    {{-- ===== PAGE HEADER ===== --}}
+    <div class="admin-hero" style="background: linear-gradient(135deg, #6B21A8 0%, #9333EA 50%, #A855F7 100%); padding: var(--space-6); margin-bottom: var(--space-6); border-radius: var(--radius-2xl);">
+        <div class="content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+            <div>
+                <h1 class="hero-title" style="font-size: 2rem; margin-bottom: var(--space-2);">
+                    <i class="fas fa-users" style="color: #FBBF24;"></i> Kelola Pengguna
+                </h1>
+                <p class="hero-subtitle">{{ $greeting }}, Admin! Kelola semua pengguna sistem e-Kantin</p>
+            </div>
+            <div class="time-badge">
+                <i class="fas fa-users"></i>
+                {{ $users->count() }} Total Pengguna
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+
+    {{-- ===== STATISTICS CARDS ===== --}}
+    <div class="admin-stats-modern animate-fade-in">
+        <div class="admin-stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: var(--gradient-primary);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-trend up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Active</span>
+                </div>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ $roleCounts->get('customer', 0) }}</div>
+                <div class="stat-label">Customers</div>
+                <div class="stat-description">Registered users</div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: var(--gradient-warning);">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="stat-trend up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Active</span>
+                </div>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ $roleCounts->get('tenant_owner', 0) }}</div>
+                <div class="stat-label">Tenants</div>
+                <div class="stat-description">Store owners</div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: var(--gradient-danger);">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="stat-trend up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Active</span>
+                </div>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ $roleCounts->get('admin', 0) }}</div>
+                <div class="stat-label">Admins</div>
+                <div class="stat-description">System admins</div>
+            </div>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: var(--gradient-info);">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-trend up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Total</span>
+                </div>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ $users->total() }}</div>
+                <div class="stat-label">All Users</div>
+                <div class="stat-description">Total registered</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== FILTERS ===== --}}
+    <div class="admin-form-modern animate-fade-in">
+        <div class="form-title">
+            <i class="fas fa-filter"></i>
+            Filter Pengguna
+        </div>
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Cari Pengguna</label>
+                <input type="text" class="form-control" name="search" placeholder="Masukkan nama atau email..." value="{{ request('search') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Role</label>
+                <select class="form-select" name="role">
+                    <option value="">Semua Role</option>
+                    <option value="customer" {{ request('role') == 'customer' ? 'selected' : '' }}>Customer ({{ $roleCounts->get('customer', 0) }})</option>
+                    <option value="tenant_owner" {{ request('role') == 'tenant_owner' ? 'selected' : '' }}>Tenant ({{ $roleCounts->get('tenant_owner', 0) }})</option>
+                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin ({{ $roleCounts->get('admin', 0) }})</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Tenant</label>
+                <select class="form-select" name="tenant">
+                    <option value="">Semua Tenant</option>
+                    @foreach($tenants as $tenant)
+                        <option value="{{ $tenant->id }}" {{ request('tenant') == $tenant->id ? 'selected' : '' }}>
+                            {{ $tenant->nama_tenant }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="admin-btn-modern primary">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </button>
+                    <a href="{{ route('users.index') }}" class="admin-btn-modern outline">
+                        <i class="fas fa-sync"></i>
+                        Reset
+                    </a>
+                    <button type="button" class="admin-btn-modern info" data-bs-toggle="modal" data-bs-target="#checkRoleModal">
+                        <i class="fas fa-search"></i>
+                        Cek Role
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {{-- ===== USERS TABLE ===== --}}
+    <div class="admin-table-modern animate-fade-in animate-delay-2">
+        <div class="table-header">
+            <div class="table-title">
+                <div class="title-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                Data Pengguna
+            </div>
+            <div class="table-actions">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Cari nama, email..." id="userSearch">
+                </div>
+                <button class="admin-btn-modern info" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    Cetak
+                </button>
+            </div>
+        </div>
+        <div class="table-body">
+            @if($users->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Tenant</th>
+                                <th>Bergabung</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($users as $user)
+                                <tr class="user-row" data-name="{{ $user->name }}" data-email="{{ $user->email }}" data-role="{{ $user->role }}">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="user-avatar" style="width: 36px; height: 36px; background: var(--gradient-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <strong style="color: var(--admin-primary);">{{ $user->name }}</strong>
+                                                @if($user->id == auth()->id())
+                                                    <span class="badge bg-info ms-2">You</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ $user->email }}</div>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ route('users.update', $user) }}" class="d-inline">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="name" value="{{ $user->name }}">
+                                            <input type="hidden" name="email" value="{{ $user->email }}">
+                                            <select name="role" class="form-select form-select-sm" style="width: auto;"
+                                                    @if($user->id == auth()->id()) disabled @endif
+                                                    onchange="if(confirm('Ubah role user {{ $user->name }}?')) this.form.submit()">
+                                                <option value="customer" {{ $user->role === 'customer' ? 'selected' : '' }}>
+                                                    🛒 Customer
+                                                </option>
+                                                <option value="tenant_owner" {{ $user->role === 'tenant_owner' ? 'selected' : '' }}>
+                                                    🏢 Tenant
+                                                </option>
+                                                <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>
+                                                    👤 Admin
+                                                </option>
+                                            </select>
+                                            @if($user->id == auth()->id())
+                                                <input type="hidden" name="role" value="{{ $user->role }}">
+                                            @endif
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <div style="color: var(--text-secondary);">{{ $user->tenant->nama_tenant ?? '-' }}</div>
+                                    </td>
+                                    <td>
+                                        <div style="color: var(--text-secondary);">{{ $user->created_at->format('d M Y') }}</div>
+                                    </td>
+                                    <td class="text-center">
+                                        @if($user->role !== 'admin' && $user->id != auth()->id())
+                                            <form method="POST" action="{{ route('users.destroy', $user) }}" class="d-inline" onsubmit="return confirm('Yakin hapus user ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="admin-btn-modern danger sm" title="Hapus user">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- PAGINATION --}}
+                @if($users->hasPages())
+                <div class="d-flex justify-content-between align-items-center mt-4 px-3">
+                    <div>
+                        <small class="text-muted">
+                            Menampilkan {{ $users->firstItem() }} hingga {{ $users->lastItem() }} dari {{ $users->total() }} pengguna
+                        </small>
+                    </div>
+                    <div>
+                        {{ $users->links('pagination::bootstrap-4') }}
+                    </div>
+                </div>
+                @endif
+            @else
+                <div class="admin-empty-modern">
+                    <span class="empty-icon">👥</span>
+                    <h4 class="empty-title">Belum Ada Pengguna</h4>
+                    <p class="empty-text">Pengguna akan muncul setelah registrasi</p>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Check Role Modal -->
+<div class="modal fade" id="checkRoleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-search me-2"></i>Cek Role User
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Email User</label>
+                    <div class="input-group">
+                        <input type="email" class="form-control" id="checkEmail" placeholder="Masukkan email user...">
+                        <button class="btn btn-primary" type="button" id="btnCheckRole">
+                            <i class="fas fa-search"></i> Cek
+                        </button>
+                    </div>
+                </div>
+                <div id="roleResult" class="d-none">
+                    <!-- Result will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Real-time search functionality
+    const searchInput = document.getElementById('userSearch');
+    const tableRows = document.querySelectorAll('#usersTable tbody .user-row');
+
+    if (searchInput && tableRows.length > 0) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                    row.style.animation = 'fadeInUp 0.3s ease';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Show/hide empty state based on search results
+            const emptyState = document.querySelector('.admin-empty-modern');
+            const tableContainer = document.querySelector('.table-responsive');
+
+            if (visibleCount === 0 && searchTerm) {
+                if (emptyState) {
+                    emptyState.style.display = 'block';
+                } else {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'admin-empty-modern';
+                    noResults.innerHTML = `
+                        <span class="empty-icon">🔍</span>
+                        <h4 class="empty-title">Tidak Ada Hasil</h4>
+                        <p class="empty-text">Tidak ada pengguna yang cocok dengan pencarian "${searchTerm}"</p>
+                    `;
+                    tableContainer.parentNode.insertBefore(noResults, tableContainer.nextSibling);
+                }
+                tableContainer.style.display = 'none';
+            } else {
+                if (emptyState && emptyState.style.display === 'block') {
+                    emptyState.style.display = 'none';
+                }
+                tableContainer.style.display = 'block';
+            }
+        });
+    }
+
+    // Check Role functionality
+    const btnCheckRole = document.getElementById('btnCheckRole');
+    const checkEmail = document.getElementById('checkEmail');
+    const roleResult = document.getElementById('roleResult');
+
+    btnCheckRole.addEventListener('click', function() {
+        const email = checkEmail.value.trim();
+
+        if (!email) {
+            alert('Masukkan email user');
+            return;
+        }
+
+        btnCheckRole.disabled = true;
+        btnCheckRole.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
+
+        fetch('{{ route("users.check-role") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            btnCheckRole.disabled = false;
+            btnCheckRole.innerHTML = '<i class="fas fa-search"></i> Cek';
+
+            if (data.error) {
+                roleResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${data.error}
+                    </div>
+                `;
+            } else {
+                let roleBadge = '';
+                switch(data.role) {
+                    case 'admin':
+                        roleBadge = '<span class="badge bg-danger">Admin</span>';
+                        break;
+                    case 'tenant_owner':
+                        roleBadge = '<span class="badge bg-warning">Tenant Owner</span>';
+                        break;
+                    default:
+                        roleBadge = '<span class="badge bg-primary">Customer</span>';
+                }
+
+                roleResult.innerHTML = `
+                    <div class="alert alert-success">
+                        <h6>Informasi User:</h6>
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr>
+                                <td><strong>Nama:</strong></td>
+                                <td>${data.name}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>${data.email}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Role:</strong></td>
+                                <td>${roleBadge}</td>
+                            </tr>
+                            ${data.tenant ? `
+                            <tr>
+                                <td><strong>Tenant:</strong></td>
+                                <td>${data.tenant.nama_tenant} (ID: ${data.tenant.id})</td>
+                            </tr>
+                            ` : ''}
+                            <tr>
+                                <td><strong>Tenant ID:</strong></td>
+                                <td>${data.tenant_id || 'Tidak ada'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bergabung:</strong></td>
+                                <td>${data.created_at}</td>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+            }
+            roleResult.classList.remove('d-none');
+        })
+        .catch(error => {
+            btnCheckRole.disabled = false;
+            btnCheckRole.innerHTML = '<i class="fas fa-search"></i> Cek';
+            roleResult.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Terjadi kesalahan: ${error.message}
+                </div>
+            `;
+            roleResult.classList.remove('d-none');
+        });
+    });
+
+    // Enter key support for email input
+    checkEmail.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            btnCheckRole.click();
+        }
+    });
+});
+</script>
+@endsection

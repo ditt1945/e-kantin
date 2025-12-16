@@ -213,6 +213,8 @@
             --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
             --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.1);
             --shadow-lg: 0 10px 40px rgba(15, 23, 42, 0.12);
+
+            --navbar-height: 76px;
         }
 
         /* ========== DARK MODE ========== */
@@ -445,6 +447,7 @@
             line-height: 1.6;
             font-size: 0.95rem;
             -webkit-font-smoothing: antialiased;
+            padding-top: calc(var(--navbar-height) + var(--space-sm));
         }
 
         .container {
@@ -459,9 +462,12 @@
             border-bottom: 1px solid var(--border-gray);
             box-shadow: var(--shadow-sm);
             padding: var(--space-md) 0;
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 1030;
+            left: 0;
+            right: 0;
+            z-index: 1100;
+            min-height: var(--navbar-height);
         }
 
         .navbar .navbar-brand {
@@ -486,16 +492,24 @@
         .navbar .nav-link {
             color: var(--text-primary) !important;
             padding: 0.5rem 0.9rem;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             font-weight: 500;
             font-size: 0.95rem;
             transition: all 0.3s ease;
             position: relative;
+            margin: 0 0.25rem;
         }
 
         .navbar .nav-link:hover {
             background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(var(--primary-rgb), 0.04) 100%);
             color: var(--primary) !important;
+            transform: translateY(-1px);
+        }
+
+        .navbar .nav-link.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #ffffff !important;
+            box-shadow: var(--shadow-md);
         }
 
         .navbar .nav-link i {
@@ -504,21 +518,31 @@
         
         .navbar .nav-link.dropdown-toggle::after {
             border-color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-link.dropdown-toggle:hover::after {
+            border-color: var(--primary);
         }
         
         .dropdown-menu {
             border: 1px solid var(--border-gray);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--radius-lg);
             margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: var(--card-bg);
         }
-        
+
         .dropdown-item {
             color: var(--text-primary);
             font-weight: 500;
             transition: all 0.3s ease;
+            border-radius: var(--radius-md);
+            padding: 0.5rem 1rem;
+            margin: 0.25rem 0;
         }
-        
+
         .dropdown-item:hover {
             background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(var(--primary-rgb), 0.04) 100%);
             color: var(--primary);
@@ -1474,6 +1498,27 @@
             }
         }
 
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-5px);
+            }
+            60% {
+                transform: translateY(-3px);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
         /* Admin Charts */
         .admin-chart-container {
             background: var(--card-bg);
@@ -1565,14 +1610,14 @@
         </div>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-light" style="background: #ffffff; border-bottom: 1px solid var(--border-gray); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+    <nav class="navbar navbar-expand-lg navbar-light" style="background: var(--navbar-bg); border-bottom: 1px solid var(--border-gray); box-shadow: var(--shadow-sm); position: fixed; top: 0; left: 0; right: 0; z-index: 1100; width: 100%;">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}" style="font-weight: 800; font-size: 1.3rem; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.5px;">
                 <i class="fas fa-utensils me-2" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>e-Kantin
             </a>
             
             @auth
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border: none; color: var(--text-primary);">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem; background: var(--card-bg); color: var(--text-primary); transition: all 0.3s ease;">
                 <i class="fas fa-bars" style="color: var(--text-primary);"></i>
             </button>
             

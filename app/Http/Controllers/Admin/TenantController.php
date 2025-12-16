@@ -11,7 +11,18 @@ class TenantController extends Controller
 {
     public function index()
     {
-        $tenants = Tenant::withCount(['menus', 'orders'])->paginate(10);
+        $tenants = Tenant::withCount(['menus', 'orders'])
+            ->with(['menus' => function($query) {
+                $query->where('is_available', true);
+            }])
+            ->paginate(10);
+
+        // Calculate additional statistics for each tenant
+        $tenants->getCollection()->transform(function ($tenant) {
+            $tenant->menus_active_count = $tenant->menus->where('is_available', true)->count();
+            $tenant->total_sales = $tenant->orders()->sum('total_harga');
+            return $tenant;
+        });
 
         return view('admin.tenants.index', compact('tenants'));
     }
@@ -87,6 +98,38 @@ class TenantController extends Controller
         $tenant->delete();
 
         return redirect()->route('tenants.index')->with('success', 'Tenant berhasil dihapus.');
+    }
+
+    public function export()
+    {
+        $tenants = Tenant::withCount(['menus', 'orders'])->get();
+
+        $filename = 'tenants_export_' . date('Y-m-d_H-i-s') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function() use ($tenants) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, ['Nama Tenant', 'Pemilik', 'No Telepon', 'Status', 'Jumlah Menu', 'Jumlah Pesanan']);
+
+            foreach ($tenants as $tenant) {
+                fputcsv($file, [
+                    $tenant->nama_tenant,
+                    $tenant->pemilik ?? '-',
+                    $tenant->no_telepon ?? '-',
+                    $tenant->is_active ? 'Aktif' : 'Nonaktif',
+                    $tenant->menus_count,
+                    $tenant->orders_count
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     private function assignOwner(Tenant $tenant, ?int $userId): void

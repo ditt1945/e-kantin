@@ -48,7 +48,7 @@ class DashboardController extends Controller
                 ->limit(5)
                 ->get();
 
-            return view('dashboard.index', compact(
+            return view('dashboard.professional-index', compact(
                 'totalTenants',
                 'totalCategories',
                 'totalMenus',

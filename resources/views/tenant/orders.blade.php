@@ -70,7 +70,7 @@
                     $borderClass = 'border-start border-4 ';
                     switch($order->status) {
                         case 'pending': $borderClass .= 'border-primary'; break;
-                        case 'pending_cash': $borderClass .= 'border-cash'; break;
+                        case 'pending_cash': $borderClass .= 'border-info'; break;
                         case 'diproses': $borderClass .= 'border-warning'; break;
                         case 'selesai': $borderClass .= 'border-success'; break;
                         case 'dibatalkan': $borderClass .= 'border-danger'; break;
@@ -81,7 +81,7 @@
                         'selesai' => 'success',
                         'diproses' => 'warning',
                         'pending' => 'primary',
-                        'pending_cash' => 'cash',
+                        'pending_cash' => 'info',
                         'dibatalkan' => 'danger',
                         default => 'secondary',
                     };

@@ -1,143 +1,243 @@
 @extends('layouts.app')
 
+@push('styles')
+@include('partials.admin-professional-styles')
+@endpush
+
+@push('styles')
+@include('partials.admin-minimalis-styles')
+@endpush
+
 @section('content')
-<div class="container-fluid py-3">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
-        <div>
-            <h2 class="page-title mb-0"><i class="fas fa-clipboard-list me-2 text-primary"></i>Semua Pesanan</h2>
-            <p class="text-muted mb-0 small d-none d-md-block">Monitoring status pesanan lintas tenant</p>
+<div class="admin-container">
+    <!-- Professional Admin Header - Inside content area -->
+    <div class="admin-header" style="background: var(--bg-primary); border-bottom: 1px solid var(--border); padding: 1rem; margin-bottom: 2rem; border-radius: var(--radius-lg);">
+        <div class="admin-header-left">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <img src="{{ asset('favicon-192.png') }}" alt="SMKN 2 Surabaya" style="width: 40px; height: 40px; border-radius: var(--radius-md);">
+                <h1 class="admin-title">
+                    <i class="fas fa-shopping-cart"></i>
+                    Semua Pesanan
+                </h1>
+            </div>
+            <p class="admin-subtitle">
+                <i class="far fa-calendar-alt"></i>
+                {{ now()->translatedFormat('l, d F Y') }} • Monitoring Status Pesanan Lintas Tenant SMKN 2 Surabaya
+            </p>
+        </div>
+        <div class="admin-header-right">
+            <a href="{{ route('orders.export') }}" class="btn btn-outline">
+                <i class="fas fa-download"></i>
+                Export
+            </a>
         </div>
     </div>
+    @php
+        // Status badges configuration
+        $statusConfig = [
+            'pending' => ['label' => 'Menunggu', 'icon' => 'clock', 'class' => 'pending'],
+            'diproses' => ['label' => 'Diproses', 'icon' => 'fire', 'class' => 'active'],
+            'selesai' => ['label' => 'Selesai', 'icon' => 'check', 'class' => 'completed'],
+            'dibatalkan' => ['label' => 'Dibatalkan', 'icon' => 'times', 'class' => 'cancelled'],
+            'pending_cash' => ['label' => 'Bayar Tunai', 'icon' => 'money-bill', 'class' => 'active']
+        ];
+    @endphp
 
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body py-2">
-            <form method="GET" class="row g-2 align-items-end">
-                <div class="col-6 col-md-4">
-                    <label class="form-label small mb-1">Tenant</label>
-                    <select name="tenant_id" class="form-select form-select-sm">
+    {{-- ===== FILTERS ===== --}}
+    <div class="admin-filter">
+        <div class="admin-filter-title">
+            <i class="fas fa-filter"></i>
+            Filter Pesanan
+        </div>
+        <form method="GET">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+                <div>
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">Tenant</label>
+                    <select name="tenant_id" class="form-control">
                         <option value="">Semua Tenant</option>
                         @foreach($tenants as $tenant)
                             <option value="{{ $tenant->id }}" @selected(request('tenant_id') == $tenant->id)>{{ $tenant->nama_tenant }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-6 col-md-4">
-                    <label class="form-label small mb-1">Status</label>
-                    <select name="status" class="form-select form-select-sm">
+                <div>
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">Status</label>
+                    <select name="status" class="form-control">
                         <option value="">Semua Status</option>
-                        @foreach(['pending' => 'Menunggu', 'diproses' => 'Diproses', 'selesai' => 'Selesai', 'dibatalkan' => 'Batal'] as $value => $label)
-                            <option value="{{ $value }}" @selected(request('status') == $value)>{{ $label }}</option>
+                        @foreach($statusConfig as $value => $config)
+                            <option value="{{ $value }}" @selected(request('status') == $value)>{{ $config['label'] }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-12 col-md-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
-                        <i class="fas fa-filter me-1"></i>Filter
-                    </button>
-                    <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+                <div>
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">Tanggal Mulai</label>
+                    <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
                 </div>
-            </form>
-        </div>
+                <div>
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">Tanggal Akhir</label>
+                    <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
+                </div>
+            </div>
+            <div class="admin-action-bar" style="margin-top: var(--space-md);">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i>
+                    Filter
+                </button>
+                <a href="{{ route('orders.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i>
+                    Reset
+                </a>
+                <button type="button" class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    Cetak
+                </button>
+                <a href="{{ route('orders.export') }}" class="btn btn-warning">
+                    <i class="fas fa-download"></i>
+                    Export
+                </a>
+            </div>
+        </form>
     </div>
 
-    {{-- Desktop Table --}}
-    <div class="card shadow-sm d-none d-md-block">
-        <div class="table-responsive">
-            <table class="table mb-0">
-                <thead class="table-light">
+    {{-- ===== STATISTICS CARDS ===== --}}
+    <div class="admin-stats-modern animate-fade-in animate-delay-1">
+        @foreach($statusConfig as $status => $config)
+            @php
+                $count = $orders->where('status', $status)->count();
+                $total = $orders->where('status', $status)->sum('total_harga');
+            @endphp
+            @if($count > 0)
+            <div class="admin-stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: {{ $status == 'pending' ? 'var(--gradient-warning)' : ($status == 'diproses' ? 'var(--gradient-primary)' : ($status == 'selesai' ? 'var(--gradient-success)' : 'var(--gradient-danger)')) }};">
+                        <i class="fas fa-{{ $config['icon'] }}"></i>
+                    </div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up"></i>
+                        {{ round(($count / $orders->count()) * 100) }}%
+                    </div>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ $count }}</div>
+                    <div class="stat-label">{{ $config['label'] }}</div>
+                    <div class="stat-description">Total Rp {{ number_format($total, 0, ',', '.') }}</div>
+                </div>
+            </div>
+            @endif
+        @endforeach
+    </div>
+
+    {{-- ===== ORDERS TABLE ===== --}}
+    <div class="admin-table-container">
+        <div class="admin-table-header">
+            <div class="admin-table-title">
+                <i class="fas fa-list"></i>
+                Data Pesanan
+            </div>
+            <div class="admin-table-search">
+                <input type="text" placeholder="Cari pesanan..." id="orderSearch">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+
+        @if($orders->count() > 0)
+            <table class="admin-table" id="ordersTable">
+                <thead>
                     <tr>
                         <th>Kode</th>
                         <th>Tenant</th>
-                        <th>Customer</th>
+                        <th>Pelanggan</th>
+                        <th>Tanggal</th>
                         <th>Total</th>
                         <th>Status</th>
-                        <th>Tanggal</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($orders as $order)
-                        <tr>
-                            <td class="fw-medium">{{ $order->kode_pesanan }}</td>
+                    @foreach($orders as $order)
+                        <tr class="order-row" data-status="{{ $order->status }}" data-tenant="{{ $order->tenant->nama_tenant ?? '' }}" data-customer="{{ $order->user->name ?? '' }}" data-code="{{ $order->kode_pesanan ?? $order->id }}">
+                            <td>
+                                <strong>{{ $order->kode_pesanan ?? $order->id }}</strong>
+                            </td>
                             <td>{{ $order->tenant->nama_tenant ?? '-' }}</td>
                             <td>{{ $order->user->name ?? '-' }}</td>
-                            <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
-                            <td><span class="badge bg-{{ $order->status === 'selesai' ? 'success' : ($order->status === 'diproses' ? 'warning' : ($order->status === 'dibatalkan' ? 'danger' : 'secondary')) }}">{{ ucfirst($order->status) }}</span></td>
-                            <td>{{ optional($order->created_at)->format('d M Y H:i') }}</td>
-                            <td class="text-end"><a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-outline-primary">Detail</a></td>
+                            <td>{{ optional($order->created_at)->format('d M Y') }}</td>
+                            <td>Rp {{ number_format($order->total_harga ?? 0, 0, ',', '.') }}</td>
+                            <td>
+                                <span class="badge badge-{{ $order->status == 'selesai' ? 'success' : ($order->status == 'diproses' ? 'warning' : ($order->status == 'dibatalkan' ? 'danger' : 'neutral')) }}">
+                                    {{ $statusConfig[$order->status]['label'] }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: var(--space-xs); justify-content: flex-end;">
+                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if($order->status == 'pending')
+                                        <form action="{{ route('orders.update-status', $order->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status" value="diproses">
+                                            <button type="submit" class="btn btn-sm btn-success" title="Proses">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if(in_array($order->status, ['pending', 'diproses']))
+                                        <form action="{{ route('orders.update-status', $order->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status" value="dibatalkan">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Batalkan">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">Belum ada pesanan.</td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
-        </div>
-        <div class="p-3">
-            {{ $orders->links() }}
-        </div>
-    </div>
 
-    {{-- Mobile Cards --}}
-    <div class="d-md-none">
-        @forelse($orders as $order)
-            @php
-                $badgeClass = match($order->status) {
-                    'selesai' => 'success',
-                    'diproses' => 'warning',
-                    'dibatalkan' => 'danger',
-                    default => 'secondary',
-                };
-            @endphp
-            <div class="card mb-2 border-start border-3 border-{{ $badgeClass }}">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <h6 class="mb-0 fw-bold">{{ $order->kode_pesanan }}</h6>
-                            <small class="text-muted">{{ $order->tenant->nama_tenant ?? '-' }}</small>
-                        </div>
-                        <span class="badge bg-{{ $badgeClass }}">{{ ucfirst($order->status) }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <small class="text-muted d-block"><i class="fas fa-user me-1"></i>{{ $order->user->name ?? '-' }}</small>
-                            <strong class="text-primary">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</strong>
-                        </div>
-                        <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                    </div>
-                    <small class="text-muted mt-1 d-block"><i class="fas fa-clock me-1"></i>{{ optional($order->created_at)->format('d M Y H:i') }}</small>
+            @if($orders->hasPages())
+                <div style="padding: var(--space-lg); display: flex; justify-content: center;">
+                    {{ $orders->links() }}
                 </div>
+            @endif
+        @else
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <div class="empty-state-title">Belum Ada Pesanan</div>
+                <div class="empty-state-text">Tidak ada pesanan yang sesuai dengan filter yang dipilih</div>
+                <a href="{{ route('orders.index') }}" class="btn btn-primary">Hapus Filter</a>
             </div>
-        @empty
-            <div class="text-center py-5">
-                <i class="fas fa-clipboard-list fa-3x text-muted mb-2"></i>
-                <p class="text-muted">Belum ada pesanan</p>
-            </div>
-        @endforelse
-        <div class="mt-3">
-            {{ $orders->links() }}
-        </div>
+        @endif
     </div>
 </div>
 
-<style>
-    .page-title {
-        font-size: 1.5rem;
-        font-weight: 700;
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('orderSearch');
+    const tableRows = document.querySelectorAll('#ordersTable tbody .order-row');
+
+    if (searchInput && tableRows.length > 0) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
     }
-    
-    @media (max-width: 768px) {
-        .page-title {
-            font-size: 1.2rem;
-        }
-        
-        .container-fluid {
-            padding-left: 12px;
-            padding-right: 12px;
-        }
-    }
-</style>
+});
+</script>
 @endsection

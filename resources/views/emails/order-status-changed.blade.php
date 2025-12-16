@@ -16,6 +16,7 @@ Status pesanan Anda telah berubah!
         'selesai' => '✅ Siap Diambil',
         'dibatalkan' => '❌ Dibatalkan',
         'pending' => '⏳ Menunggu',
+        'pending_cash' => '💰 Menunggu Pembayaran Tunai',
         default => ucfirst($newStatus),
     };
 @endphp
