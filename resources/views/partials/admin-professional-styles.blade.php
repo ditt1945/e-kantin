@@ -49,8 +49,8 @@
 
     /* Text Colors */
     --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-muted: #94a3b8;
+    --text-secondary: #475569;
+    --text-muted: #6b7280;
 
     /* Border Colors */
     --border: #e2e8f0;
@@ -290,7 +290,7 @@ body {
 .section-title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: black;
     margin: 0 0 1.5rem 0;
     display: flex;
     align-items: center;
@@ -398,13 +398,13 @@ body {
 .card-content h3 {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: black;
     margin: 0 0 0.25rem 0;
 }
 
 .card-content p {
     font-size: 0.875rem;
-    color: var(--text-secondary);
+    color: black;
     margin: 0;
     line-height: 1.4;
 }
@@ -493,7 +493,7 @@ table {
 thead th {
     background: var(--bg-tertiary);
     font-weight: 600;
-    color: var(--text-primary);
+    color: black;
     padding: 1rem;
     text-align: left;
     font-size: 0.75rem;
@@ -518,7 +518,7 @@ tbody tr:last-child td {
 
 .order-id {
     font-weight: 600;
-    color: var(--text-primary);
+    color: black;
 }
 
 .tenant-name {
@@ -527,7 +527,7 @@ tbody tr:last-child td {
 
 .order-total {
     font-weight: 600;
-    color: var(--text-primary);
+    color: black;
     text-align: right;
 }
 

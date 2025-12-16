@@ -151,9 +151,9 @@
                             Password
                         </label>
                         <div class="password-wrapper">
-                            <input type="password" 
-                                id="password" 
-                                name="password" 
+                            <input type="password"
+                                id="password"
+                                name="password"
                                 placeholder="Masukkan password"
                                 class="@error('password') error @enderror"
                                 required>

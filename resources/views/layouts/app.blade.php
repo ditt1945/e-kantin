@@ -217,19 +217,19 @@
             --navbar-height: 76px;
         }
 
-        /* ========== DARK MODE ========== */
+          /* ========== DARK MODE ========== */
         [data-theme="dark"] {
             --text-primary: #F1F5F9;      /* Slate-100 */
             --text-secondary: #94A3B8;    /* Slate-400 */
             --border-gray: #334155;       /* Slate-700 */
             --light-gray: #1E293B;        /* Slate-800 */
             --dark: #F8FAFC;              /* Slate-50 */
-            
+
             --card-bg: #1E293B;
             --body-bg: #0F172A;
             --navbar-bg: #1E293B;
             --input-bg: #334155;
-            
+
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
             --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
             --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
