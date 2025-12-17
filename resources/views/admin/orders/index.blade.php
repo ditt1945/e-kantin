@@ -26,8 +26,8 @@
             </p>
         </div>
         <div class="admin-header-right">
-            <a href="{{ route('orders.export') }}" class="btn btn-outline">
-                <i class="fas fa-download"></i>
+            <a href="{{ route('orders.export') }}" class="btn btn-outline-primary">
+                <i class="fas fa-download me-1"></i>
                 Export
             </a>
         </div>
@@ -50,7 +50,13 @@
             Filter Pesanan
         </div>
         <form method="GET">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-md);">
+                <div>
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">
+                        <i class="fas fa-search"></i> Cari Pesanan
+                    </label>
+                    <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Kode, tenant, customer, atau menu">
+                </div>
                 <div>
                     <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">Tenant</label>
                     <select name="tenant_id" class="form-control">
@@ -80,19 +86,19 @@
             </div>
             <div class="admin-action-bar" style="margin-top: var(--space-md);">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-filter"></i>
+                    <i class="fas fa-filter me-1"></i>
                     Filter
                 </button>
                 <a href="{{ route('orders.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-redo"></i>
+                    <i class="fas fa-redo me-1"></i>
                     Reset
                 </a>
                 <button type="button" class="btn btn-secondary" onclick="window.print()">
-                    <i class="fas fa-print"></i>
+                    <i class="fas fa-print me-1"></i>
                     Cetak
                 </button>
                 <a href="{{ route('orders.export') }}" class="btn btn-warning">
-                    <i class="fas fa-download"></i>
+                    <i class="fas fa-download me-1"></i>
                     Export
                 </a>
             </div>
@@ -201,8 +207,13 @@
             </table>
 
             @if($orders->hasPages())
-                <div style="padding: var(--space-lg); display: flex; justify-content: center;">
-                    {{ $orders->links() }}
+                <div style="padding: var(--space-lg);">
+                    <div class="pagination-info">
+                        Menampilkan {{ $orders->firstItem() }} - {{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
+                    </div>
+                    <div style="display: flex; justify-content: center;">
+                        {{ $orders->links() }}
+                    </div>
                 </div>
             @endif
         @else
@@ -210,7 +221,9 @@
                 <div class="empty-state-icon">📋</div>
                 <div class="empty-state-title">Belum Ada Pesanan</div>
                 <div class="empty-state-text">Tidak ada pesanan yang sesuai dengan filter yang dipilih</div>
-                <a href="{{ route('orders.index') }}" class="btn btn-primary">Hapus Filter</a>
+                                    <a href="{{ route('orders.index') }}" class="btn btn-primary">
+                    <i class="fas fa-times me-1"></i>Hapus Filter
+                </a>
             </div>
         @endif
     </div>

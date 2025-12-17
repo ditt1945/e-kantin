@@ -12,10 +12,10 @@
                 <p class="orders-subtitle d-none d-md-block">Lihat semua pesanan yang telah Anda buat</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('customer.dashboard') }}" class="btn btn-sm btn-primary" style="padding: 0.5rem 1rem; border-radius: 8px;">
+                <a href="{{ route('customer.dashboard') }}" class="btn btn-sm btn-primary">
                     <i class="fas fa-home me-1"></i><span class="d-none d-sm-inline">Dashboard</span>
                 </a>
-                <button onclick="history.back()" class="btn btn-sm" style="background: var(--light-gray); border: none; color: var(--text-primary); padding: 0.5rem 1rem; border-radius: 8px;">
+                <button onclick="history.back()" class="btn btn-sm btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i><span class="d-none d-sm-inline">Kembali</span>
                 </button>
             </div>
@@ -152,12 +152,23 @@
         </div>
         @endforeach
     </div>
+
+    @if($orders->hasPages())
+        <div class="pagination-info">
+            Menampilkan {{ $orders->firstItem() }} - {{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
+        </div>
+        <div class="d-flex justify-content-center mb-4">
+            {{ $orders->links() }}
+        </div>
+    @endif
 @else
 <div class="text-center py-5">
     <i class="fas fa-history fa-4x text-muted mb-3"></i>
     <h4 class="text-muted">Belum ada riwayat pesanan</h4>
     <p class="text-muted">Mulai pesan dari tenant untuk melihat riwayat pesanan di sini.</p>
-    <a href="{{ route('customer.tenants') }}" class="btn btn-primary">Telusuri Tenant</a>
+    <a href="{{ route('customer.tenants') }}" class="btn btn-primary">
+        <i class="fas fa-store me-2"></i>Telusuri Tenant
+    </a>
 </div>
 @endif
 
@@ -245,6 +256,14 @@
             width: 100%;
             justify-content: center;
         }
+    }
+
+    /* Pagination info for orders */
+    .pagination-info {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin: 1.5rem 0 1rem 0;
     }
 </style>
 @endpush

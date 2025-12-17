@@ -34,7 +34,9 @@
                     </button>
                 </div>
                 <div class="col-6 col-md-3">
-                    <a href="{{ route('tenant.orders') }}" class="btn btn-sm btn-outline-secondary w-100">Reset</a>
+                    <a href="{{ route('tenant.orders') }}" class="btn btn-sm btn-outline-secondary w-100">
+                        <i class="fas fa-redo me-1"></i>Reset
+                    </a>
                 </div>
             </div>
         </div>
@@ -185,9 +187,16 @@
                 </div>
             @endforeach
         </div>
-        <div class="mt-4">
-            {{ $orders->links() }}
-        </div>
+
+        <!-- Pagination Info -->
+        @if($orders->hasPages())
+            <div class="d-flex flex-column align-items-center mt-4">
+                <div class="pagination-info">
+                    Menampilkan {{ $orders->firstItem() }} - {{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
+                </div>
+                {{ $orders->links() }}
+            </div>
+        @endif
     @else
         <div class="text-center py-5">
             <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>

@@ -247,6 +247,12 @@
     gap: 0.75rem;
 }
 
+.action-buttons .btn {
+    padding: 0.75rem 1rem !important;
+    font-weight: 500;
+    flex: 1;
+}
+
 .btn-primary-modern {
     flex: 1;
     padding: 0.625rem 1rem;
@@ -525,6 +531,22 @@
 .star:hover {
     transform: scale(1.1);
 }
+
+/* Simple Pagination Enhancements */
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 2px;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+    transform: translateY(-1px);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+}
 </style>
 @endpush
 
@@ -636,11 +658,11 @@
                 <!-- Footer -->
                 <div class="tenant-footer">
                     <div class="action-buttons">
-                        <a href="{{ route('customer.menus', $tenant) }}" class="btn-primary-modern">
-                            Lihat Menu
+                        <a href="{{ route('customer.menus', $tenant) }}" class="btn btn-primary">
+                            <i class="fas fa-utensils me-1"></i>Lihat Menu
                         </a>
-                        <button class="btn-outline-modern quick-view" data-tenant="{{ $tenant->id }}">
-                            Detail
+                        <button class="btn btn-outline-secondary quick-view" data-tenant="{{ $tenant->id }}">
+                            <i class="fas fa-eye me-1"></i>Detail
                         </button>
                     </div>
                 </div>
@@ -663,8 +685,8 @@
         </div>
         <h2 class="empty-state-title">Tenant Tidak Ditemukan</h2>
         <p class="empty-state-text">Coba ubah filter atau kata kunci pencarian Anda</p>
-        <a href="{{ route('customer.tenants') }}" class="btn-primary-modern" style="display: inline-flex;">
-            Reset Filter
+        <a href="{{ route('customer.tenants') }}" class="btn btn-primary">
+            <i class="fas fa-redo me-2"></i>Reset Filter
         </a>
     </div>
     @endif

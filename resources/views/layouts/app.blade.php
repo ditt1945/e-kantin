@@ -12,6 +12,9 @@
     <!-- Include mobile optimizations -->
     @include('partials.mobile-optimizations')
 
+    <!-- Include global button standards -->
+    @include('partials.global-button-styles')
+
     <!-- Include custom styles -->
     @stack('styles')
 
