@@ -192,9 +192,7 @@
         @if($orders->hasPages())
             <div class="d-flex flex-column align-items-center mt-4">
                 <div class="pagination-info">
-                    <i class="fas fa-info-circle me-1"></i>
                     Menampilkan {{ $orders->firstItem() }} - {{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
-                    (Halaman {{ $orders->currentPage() }} dari {{ $orders->lastPage() }})
                 </div>
                 {{ $orders->links() }}
             </div>

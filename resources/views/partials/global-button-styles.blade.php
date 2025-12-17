@@ -307,33 +307,29 @@
     }
 
     .pagination .page-link {
-        border-radius: 8px !important;
-        margin: 0 0.125rem;
+        border-radius: 6px !important;
+        margin: 0 0.25rem;
         font-size: 0.875rem;
         padding: 0.5rem 0.75rem;
-        border: 1px solid var(--bs-border-color, #dee2e6);
-        color: var(--bs-primary, #0d6efd);
+        border: 1px solid #dee2e6;
+        color: #0d6efd;
         background: #ffffff;
-        transition: all 0.2s ease;
         font-weight: 500;
         min-width: 40px;
         text-align: center;
     }
 
     .pagination .page-link:hover {
-        background: var(--bs-primary, #0d6efd);
-        border-color: var(--bs-primary, #0d6efd);
-        color: #ffffff;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+        background: #f8f9fa;
+        border-color: #dee2e6;
+        color: #0d6efd;
     }
 
     .pagination .page-item.active .page-link {
-        background: linear-gradient(135deg, var(--bs-primary, #0d6efd), #0056b3);
-        border-color: var(--bs-primary, #0d6efd);
+        background: #0d6efd;
+        border-color: #0d6efd;
         color: #ffffff;
         font-weight: 600;
-        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
     }
 
     .pagination .page-item.disabled .page-link {
@@ -351,17 +347,6 @@
         color: #6c757d;
         font-size: 0.875rem;
         margin: 1rem 0;
-        padding: 0.75rem 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        display: inline-block;
-    }
-
-    [data-theme="dark"] .pagination-info {
-        background: #2d3748;
-        border-color: #4a5568;
-        color: #e2e8f0;
     }
 
     /* Dark Mode Support */
