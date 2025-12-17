@@ -258,12 +258,5 @@
         }
     }
 
-    /* Pagination info for orders */
-    .pagination-info {
-        text-align: center;
-        color: #6c757d;
-        font-size: 0.875rem;
-        margin: 1.5rem 0 1rem 0;
-    }
-</style>
+    </style>
 @endpush

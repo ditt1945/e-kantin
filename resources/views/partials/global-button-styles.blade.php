@@ -296,49 +296,47 @@
         100% { transform: rotate(360deg); }
     }
 
-    /* ==================== GLOBAL PAGINATION STANDARDS ==================== */
+    /* ==================== SIMPLE PAGINATION ==================== */
 
     .pagination {
         margin-bottom: 0;
         display: flex;
         justify-content: center;
-        align-items: center;
-        gap: 0.25rem;
     }
 
     .pagination .page-link {
-        border-radius: 6px !important;
-        margin: 0 0.25rem;
-        font-size: 0.875rem;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #dee2e6;
-        color: #0d6efd;
-        background: #ffffff;
-        font-weight: 500;
-        min-width: 40px;
-        text-align: center;
+        margin: 0 2px !important;
+        font-size: 14px !important;
+        padding: 6px 12px !important;
+        border: 1px solid #ddd !important;
+        color: #333 !important;
+        background: #fff !important;
+        text-decoration: none;
+        border-radius: 4px !important;
+        min-width: auto !important;
     }
 
     .pagination .page-link:hover {
-        background: #f8f9fa;
-        border-color: #dee2e6;
-        color: #0d6efd;
+        background: #f5f5f5 !important;
+        color: #333 !important;
     }
 
     .pagination .page-item.active .page-link {
-        background: #0d6efd;
-        border-color: #0d6efd;
-        color: #ffffff;
-        font-weight: 600;
+        background: #007bff !important;
+        border-color: #007bff !important;
+        color: #fff !important;
     }
 
-    .pagination .page-item.disabled .page-link {
-        background: #f8f9fa;
-        border-color: #dee2e6;
-        color: #6c757d;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
+    /* Hilangkan panah dari pagination bootstrap */
+    .pagination .page-link::before,
+    .pagination .page-link::after {
+        display: none !important;
+    }
+
+    /* Pastikan tidak ada content tambahan */
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        display: none !important;
     }
 
     /* Pagination Info Text */
