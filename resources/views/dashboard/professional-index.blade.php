@@ -172,7 +172,7 @@
             </a>
 
             <!-- Laporan -->
-            <a href="#" class="management-card">
+            <a href="{{ route('reports.index') }}" class="management-card">
                 <div class="card-icon secondary">
                     <i class="fas fa-chart-bar"></i>
                 </div>

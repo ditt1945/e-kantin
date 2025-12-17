@@ -17,11 +17,22 @@ class TenantMenuController extends Controller
         return view('tenant.menus.index', compact('menus', 'tenant'));
     }
 
+    public function show(Menu $menu)
+    {
+        // Authorization - hanya bisa lihat menu milik sendiri
+        if ($menu->tenant_id !== Auth::user()->tenant->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $menu->load('category');
+        return view('tenant.menus.show', compact('menu'));
+    }
+
     public function create()
     {
         $tenant = Auth::user()->tenant;
         $categories = Category::all(); // ✅ Ambil semua kategori yang ada
-        
+
         return view('tenant.menus.create', compact('tenant', 'categories'));
     }
 

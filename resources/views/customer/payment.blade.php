@@ -1,9 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-3 py-md-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8">
+<div class="container-fluid py-3">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
+        <div>
+            <h2 class="page-title mb-0">
+                <i class="fas fa-credit-card me-2 text-primary"></i>Pembayaran
+            </h2>
+            <p class="text-muted small mb-0 d-none d-md-block">Selesaikan pembayaran untuk pesanan Anda</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('customer.orders') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+                <span class="d-none d-sm-inline">Kembali</span>
+            </a>
+            <a href="{{ route('customer.dashboard') }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-home me-1"></i>
+                <span class="d-none d-sm-inline">Dashboard</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
             @if(session('success'))
                 <div class="alert alert-success" role="alert">
                     <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
@@ -25,35 +45,28 @@
                 </div>
             @endif
 
-            {{-- Payment Header --}}
-            <div class="mb-3 mb-md-4">
-                <h2 class="payment-title">
-                    <i class="fas fa-credit-card me-2" style="color: var(--primary);"></i>Pembayaran
-                </h2>
-                <p class="payment-subtitle d-none d-md-block">Selesaikan pembayaran untuk pesanan Anda</p>
-            </div>
-
+  
             {{-- Order Summary Card --}}
             <div class="card mb-4">
-                <div class="card-header" style="background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(var(--primary-rgb), 0.04) 100%); border-bottom: 2px solid var(--border-gray);">
+                <div class="card-header bg-light">
                     <h5 class="mb-0">
-                        <i class="fas fa-shopping-cart me-2" style="color: var(--primary);"></i>Ringkasan Pesanan
+                        <i class="fas fa-shopping-cart me-2 text-primary"></i>Ringkasan Pesanan
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <small style="color: var(--text-secondary);">Kode Pesanan</small>
-                        <p style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">{{ $order->kode_pesanan }}</p>
+                        <small class="text-muted">Kode Pesanan</small>
+                        <p class="fw-bold mb-0">{{ $order->kode_pesanan }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <small style="color: var(--text-secondary);">Kantin</small>
-                        <p style="font-weight: 600; color: var(--text-primary);">{{ $order->tenant->nama_tenant }}</p>
+                        <small class="text-muted">Kantin</small>
+                        <p class="fw-semibold mb-0">{{ $order->tenant->nama_tenant }}</p>
                     </div>
 
-                    <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                    <div class="bg-light p-3 rounded mb-3">
                         @foreach($order->orderItems as $item)
-                        <div class="d-flex justify-content-between mb-2" style="padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-gray);">
+                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
                             <span>{{ $item->quantity }}x {{ $item->menu->nama_menu }}</span>
                             <strong>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</strong>
                         </div>
@@ -63,7 +76,7 @@
                     {{-- Voucher Section --}}
                     <div class="mb-3">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <small style="color: var(--text-secondary); font-weight: 600;">Voucher</small>
+                            <small class="text-muted fw-semibold">Voucher</small>
                             @if($payment->voucher_code)
                                 <span class="badge bg-success text-uppercase">{{ $payment->voucher_code }}</span>
                             @endif
@@ -81,8 +94,8 @@
                             @enderror
                         @else
                             <div class="d-flex flex-column flex-sm-row gap-2">
-                                <div class="flex-grow-1" style="background: rgba(var(--primary-rgb), 0.05); border-radius: 10px; padding: 0.75rem;">
-                                    <p class="mb-0" style="font-weight: 600; color: var(--text-primary);">
+                                <div class="flex-grow-1 bg-light p-2 rounded">
+                                    <p class="mb-0 fw-semibold">
                                         <i class="fas fa-badge-percent me-1"></i>Voucher diterapkan: {{ $payment->voucher_details['description'] ?? 'Diskon spesial' }}
                                     </p>
                                 </div>
@@ -95,20 +108,20 @@
                         @endif
                     </div>
 
-                    <div style="border-top: 2px solid var(--border-gray); padding-top: 1rem;">
+                    <div class="border-top pt-3">
                         <div class="d-flex justify-content-between mb-2">
-                            <span style="color: var(--text-secondary);">Subtotal</span>
+                            <span class="text-muted">Subtotal</span>
                             <span>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</span>
                         </div>
                         @if($payment->discount_amount > 0)
-                        <div class="d-flex justify-content-between mb-2" style="color: var(--success); font-weight: 600;">
+                        <div class="d-flex justify-content-between mb-2 text-success fw-semibold">
                             <span>Potongan Voucher</span>
                             <span>- Rp {{ number_format($payment->discount_amount, 0, ',', '.') }}</span>
                         </div>
                         @endif
-                        <div class="d-flex justify-content-between" style="border-top: 1px solid var(--border-gray); padding-top: 1rem; font-weight: 700; font-size: 1.2rem;">
-                            <span>Total</span>
-                            <span style="color: var(--primary);">Rp {{ number_format($payment->amount, 0, ',', '.') }}</span>
+                        <div class="d-flex justify-content-between border-top pt-3">
+                            <span class="fw-bold fs-5">Total</span>
+                            <span class="fw-bold fs-5 text-primary">Rp {{ number_format($payment->amount, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -116,9 +129,9 @@
 
             {{-- Payment Method Card --}}
             <div class="card mb-4">
-                <div class="card-header" style="background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(var(--primary-rgb), 0.04) 100%); border-bottom: 2px solid var(--border-gray);">
+                <div class="card-header bg-light">
                     <h5 class="mb-0">
-                        <i class="fas fa-wallet me-2" style="color: var(--primary);"></i>Metode Pembayaran
+                        <i class="fas fa-wallet me-2 text-primary"></i>Metode Pembayaran
                     </h5>
                 </div>
                 <div class="card-body">
@@ -134,9 +147,9 @@
                             <p class="mb-0 mt-2">Silakan bayar secara tunai di kantin <strong>{{ $order->tenant->nama_tenant }}</strong>. Tunjukkan kode pesanan Anda kepada penjual.</p>
                         </div>
                         <div class="text-center mt-3">
-                            <div class="order-code-display">
+                            <div class="bg-light p-3 rounded border border-primary border-dashed">
                                 <small class="text-muted d-block mb-1">Kode Pesanan:</small>
-                                <span class="display-6 fw-bold" style="color: var(--primary); letter-spacing: 2px;">{{ $order->kode_pesanan }}</span>
+                                <span class="fs-2 fw-bold text-primary">{{ $order->kode_pesanan }}</span>
                             </div>
                         </div>
                     @elseif($payment->status === 'failed')
@@ -147,7 +160,7 @@
                     @else
                         {{-- Payment Method Selection --}}
                         <div class="payment-method-selection mb-4">
-                            <p class="text-center mb-3" style="color: var(--text-secondary); font-size: 0.9rem;">
+                            <p class="text-center mb-3 text-muted">
                                 Pilih metode pembayaran yang Anda inginkan:
                             </p>
                             
@@ -198,7 +211,7 @@
                                     </a>
                                 @endif
                             </div>
-                            <p class="text-center mt-2 mb-0" style="color: var(--text-secondary); font-size: 0.8rem;">
+                            <p class="text-center mt-2 mb-0 small text-muted">
                                 <i class="fas fa-shield-alt me-1"></i>Pembayaran aman melalui Midtrans
                             </p>
                         </div>
@@ -224,7 +237,7 @@
                                     </button>
                                 </div>
                             </form>
-                            <p class="text-center mt-2 mb-0" style="color: var(--text-secondary); font-size: 0.8rem;">
+                            <p class="text-center mt-2 mb-0 small text-muted">
                                 <i class="fas fa-store me-1"></i>Pesanan akan diproses setelah pembayaran dikonfirmasi penjual
                             </p>
                         </div>
@@ -232,25 +245,7 @@
                 </div>
             </div>
 
-            {{-- Navigation Buttons --}}
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('customer.orders') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Kembali ke Pesanan
-                </a>
-                <a href="{{ route('customer.dashboard') }}" class="btn btn-outline-primary">
-                    <i class="fas fa-home me-1"></i>Dashboard
-                </a>
-                @if($payment->isPaid())
-                    <a href="{{ route('customer.dashboard') }}" class="btn btn-success">
-                        <i class="fas fa-check me-1"></i>Selesai dan Kembali ke Dashboard
-                    </a>
-                @elseif($payment->status !== 'failed')
-                    <a href="{{ route('payment.verify', $order) }}" class="btn btn-primary">
-                        <i class="fas fa-sync me-1"></i>Verifikasi Pembayaran
-                    </a>
-                @endif
             </div>
-        </div>
     </div>
 </div>
 
@@ -315,104 +310,91 @@
 
 @push('styles')
 <style>
-    .payment-title {
-        font-weight: 800;
-        font-size: 2rem;
-        margin-bottom: 0.3rem;
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
     }
-    .payment-subtitle {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-        margin: 0;
-    }
-    
+
     /* Payment Method Selection Styles */
     .payment-option {
         display: flex;
         align-items: center;
         gap: 1rem;
         padding: 1rem;
-        border: 2px solid var(--border-gray);
+        border: 2px solid #dee2e6;
         border-radius: 12px;
         cursor: pointer;
         transition: all 0.3s ease;
         background: #fff;
     }
-    
+
     .payment-option:hover {
-        border-color: var(--primary);
-        background: rgba(var(--primary-rgb), 0.02);
+        border-color: #0d6efd;
+        background: rgba(13, 110, 253, 0.02);
     }
-    
+
     .payment-option.active {
-        border-color: var(--primary);
-        background: rgba(var(--primary-rgb), 0.05);
-        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        border-color: #0d6efd;
+        background: rgba(13, 110, 253, 0.05);
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
     }
-    
+
     .payment-option-icon {
         width: 50px;
         height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
         color: #fff;
         border-radius: 12px;
         font-size: 1.3rem;
         flex-shrink: 0;
     }
-    
+
     .payment-option-icon.cash-icon {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
     }
-    
+
     .payment-option-content {
         flex-grow: 1;
     }
-    
+
     .payment-option-content h6 {
         font-weight: 700;
-        color: var(--text-primary);
+        color: #212529;
         margin: 0;
     }
-    
+
     .payment-option-content small {
         font-size: 0.8rem;
     }
-    
+
     .payment-option-check {
         font-size: 1.3rem;
-        color: var(--primary);
+        color: #0d6efd;
         opacity: 0;
         transform: scale(0.5);
         transition: all 0.3s ease;
     }
-    
+
     .payment-option.active .payment-option-check {
         opacity: 1;
         transform: scale(1);
     }
-    
+
     .payment-section {
         animation: fadeIn 0.3s ease;
     }
-    
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
-    .order-code-display {
-        background: rgba(var(--primary-rgb), 0.05);
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 2px dashed var(--primary);
-    }
-    
+
     @media (max-width: 768px) {
-        .payment-title {
-            font-size: 1.5rem;
+        .page-title {
+            font-size: 1.2rem;
         }
         .card-header h5 {
             font-size: 0.95rem;
@@ -423,14 +405,6 @@
         .btn-lg {
             padding: 0.65rem 1rem;
             font-size: 0.95rem;
-        }
-        .d-flex.flex-wrap.gap-2 {
-            gap: 0.5rem !important;
-        }
-        .d-flex.flex-wrap.gap-2 .btn {
-            flex: 1 1 auto;
-            font-size: 0.85rem;
-            padding: 0.5rem 0.75rem;
         }
         .payment-option {
             padding: 0.75rem;
@@ -448,25 +422,13 @@
             font-size: 1rem;
         }
     }
-    
+
     @media (max-width: 576px) {
-        .payment-title {
+        .page-title {
             font-size: 1.3rem;
-        }
-        .payment-title i {
-            font-size: 1.1rem;
-        }
-        .d-flex.flex-wrap.gap-2 {
-            flex-direction: column;
-        }
-        .d-flex.flex-wrap.gap-2 .btn {
-            width: 100%;
         }
         .form-control {
             font-size: 0.9rem;
-        }
-        .order-code-display .display-6 {
-            font-size: 1.5rem;
         }
     }
 </style>

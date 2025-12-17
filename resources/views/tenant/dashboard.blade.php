@@ -464,7 +464,7 @@
                 <i class="fas fa-store"></i>
                 {{ $tenant->nama_tenant }}
             </div>
-            <h1>{{ $greeting }}, Partner!</h1>
+            <h1>{{ $greeting }}, {{ Auth::user()->name }}!</h1>
             <p class="subtitle">{{ $tenant->deskripsi ? Str::limit($tenant->deskripsi, 50) : 'Kelola kantin Anda' }}</p>
             <div class="time-info">
                 <i class="fas fa-calendar-alt"></i>

@@ -21,11 +21,25 @@ use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
-    public function showTenants()
+    public function showTenants(Request $request)
     {
-        $tenants = Tenant::withCount('menus')
-            ->where('is_active', true)
-            ->paginate(9); // Show 9 tenants per page (3x3 grid)
+        $query = Tenant::withCount('menus')
+            ->where('is_active', true);
+
+        // Handle sorting
+        if ($request->sort === 'popular') {
+            $query->withSum('orderItems as total_sales')
+                  ->orderByDesc('total_sales');
+        } else {
+            $query->orderBy('nama_tenant');
+        }
+
+        // Handle filtering
+        if ($request->filter === 'promo') {
+            $query->where('has_promotion', true);
+        }
+
+        $tenants = $query->paginate(9); // Show 9 tenants per page (3x3 grid)
         return view('customer.tenants', compact('tenants'));
     }
 

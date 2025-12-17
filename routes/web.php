@@ -13,8 +13,13 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\MenuController as AdminMenuController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +44,17 @@ Route::middleware('guest')->group(function () {
     Route::post('register', [RegisteredUserController::class, 'store']);
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    // Password Reset Routes
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+    // Email Verification Routes
+    Route::get('email/verify', [VerificationController::class, 'show'])->name('verification.notice');
+    Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
+    Route::post('email/verification-notification', [VerificationController::class, 'resend'])->name('verification.resend');
 });
 
 // Midtrans Webhook (public - no auth)
@@ -53,7 +69,11 @@ Route::middleware('auth')->group(function () {
         $request->session()->regenerateToken();
         return redirect('/login')->with('success', 'Berhasil logout!');
     })->name('logout');
-    
+
+    // Password Confirmation Routes
+    Route::get('password/confirm', [ConfirmPasswordController::class, 'showConfirmForm'])->name('password.confirm');
+    Route::post('password/confirm', [ConfirmPasswordController::class, 'confirm']);
+
     // Home untuk redirect berdasarkan role
     Route::get('/home', [DashboardController::class, 'redirectBasedOnRole'])->name('home');
     
@@ -90,6 +110,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::get('/orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
+
+        // Admin reports and analytics
+        Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
 
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
@@ -151,6 +175,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/menus', [TenantMenuController::class, 'index'])->name('tenant.menus.index');
         Route::get('/menus/create', [TenantMenuController::class, 'create'])->name('tenant.menus.create');
         Route::post('/menus', [TenantMenuController::class, 'store'])->name('tenant.menus.store');
+        Route::get('/menus/{menu}', [TenantMenuController::class, 'show'])->name('tenant.menus.show');
         Route::get('/menus/{menu}/edit', [TenantMenuController::class, 'edit'])->name('tenant.menus.edit');
         Route::put('/menus/{menu}', [TenantMenuController::class, 'update'])->name('tenant.menus.update');
         Route::delete('/menus/{menu}', [TenantMenuController::class, 'destroy'])->name('tenant.menus.destroy');

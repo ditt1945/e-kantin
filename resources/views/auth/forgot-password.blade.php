@@ -48,156 +48,133 @@
 @endpush
 
 @section('content')
-<div class="login-page" data-bs-theme="light">
+<div class="forgot-password-page" data-bs-theme="light">
     <!-- Theme Toggle Button -->
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
         <i class="fas fa-moon" id="themeIcon"></i>
     </button>
-    <div class="login-container">
+    <div class="forgot-password-container">
         {{-- Left Side - Branding --}}
-        <div class="login-branding d-none d-lg-flex">
+        <div class="forgot-password-branding d-none d-lg-flex">
             <div class="branding-content">
                 <div class="logo-section">
                     <div class="logo-icon">
-                        <i class="fas fa-utensils"></i>
+                        <i class="fas fa-key"></i>
                     </div>
-                    <h1>e-Kantin</h1>
+                    <h1>Lupa Password</h1>
                     <p class="tagline">SMKN 2 Surabaya</p>
                 </div>
-                
-                <div class="features-list">
-                    <div class="feature-item">
-                        <div class="feature-icon bg-1">
-                            <i class="fas fa-bolt"></i>
+
+                <div class="instructions-list">
+                    <div class="instruction-item">
+                        <div class="instruction-icon bg-1">
+                            <i class="fas fa-envelope"></i>
                         </div>
-                        <div class="feature-text">
-                            <h5>Pesan Cepat</h5>
-                            <p>Proses pemesanan dalam hitungan detik</p>
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon bg-2">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="feature-text">
-                            <h5>Pembayaran Aman</h5>
-                            <p>Terintegrasi dengan Midtrans</p>
+                        <div class="instruction-text">
+                            <h5>Masukkan Email</h5>
+                            <p>Gunakan email yang terdaftar</p>
                         </div>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-icon bg-3">
-                            <i class="fas fa-heart"></i>
+                    <div class="instruction-item">
+                        <div class="instruction-icon bg-2">
+                            <i class="fas fa-paper-plane"></i>
                         </div>
-                        <div class="feature-text">
-                            <h5>Menu Favorit</h5>
-                            <p>Berbagai pilihan makanan lezat</p>
+                        <div class="instruction-text">
+                            <h5>Kirim Link Reset</h5>
+                            <p>Periksa inbox email Anda</p>
+                        </div>
+                    </div>
+                    <div class="instruction-item">
+                        <div class="instruction-icon bg-3">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="instruction-text">
+                            <h5>Reset Password</h5>
+                            <p>Buat password baru Anda</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="branding-footer">
-                    <p><i class="fas fa-school me-2"></i>Platform Kantin Digital Sekolah</p>
+                    <p><i class="fas fa-shield-alt me-2"></i>Keamanan akun prioritas kami</p>
                 </div>
             </div>
         </div>
 
-        {{-- Right Side - Login Form --}}
-        <div class="login-form-section">
-            <div class="login-card">
+        {{-- Right Side - Forgot Password Form --}}
+        <div class="forgot-password-form-section">
+            <div class="forgot-password-card">
                 {{-- Mobile Logo --}}
                 <div class="mobile-logo d-lg-none">
                     <div class="logo-icon-sm">
-                        <i class="fas fa-utensils"></i>
+                        <i class="fas fa-key"></i>
                     </div>
                     <h2>e-Kantin</h2>
                 </div>
-                
+
                 <div class="form-header">
-                    <h3>Selamat Datang! 👋</h3>
-                    <p>Masuk untuk melanjutkan ke akun Anda</p>
+                    <h3>Lupa Password? 🔐</h3>
+                    <p>Masukkan email untuk menerima link reset password</p>
                 </div>
 
-                @if($errors->has('email') || $errors->has('password'))
-                    <div class="alert-box error">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span>{{ $errors->first('email') ?? $errors->first('password') }}</span>
+                @if (session('status'))
+                    <div class="alert-box success">
+                        <i class="fas fa-check-circle"></i>
+                        <span>{{ session('status') }}</span>
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('login') }}" class="login-form">
+                @if($errors->has('email'))
+                    <div class="alert-box error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>{{ $errors->first('email') }}</span>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('password.email') }}" class="forgot-password-form">
                     @csrf
 
                     <div class="form-group">
                         <label for="email">
                             <i class="fas fa-envelope"></i>
-                            Email
+                            Email Terdaftar
                         </label>
-                        <input type="email" 
-                            id="email" 
-                            name="email" 
-                            value="{{ old('email') }}" 
+                        <input type="email"
+                            id="email"
+                            name="email"
+                            value="{{ old('email') }}"
                             placeholder="nama@email.com"
                             class="@error('email') error @enderror"
-                            required 
+                            required
                             autofocus>
                         @error('email')
                             <span class="error-text">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div class="form-group">
-                        <label for="password">
-                            <i class="fas fa-lock"></i>
-                            Password
-                        </label>
-                        <div class="password-wrapper">
-                            <input type="password"
-                                id="password"
-                                name="password"
-                                placeholder="Masukkan password"
-                                class="@error('password') error @enderror"
-                                required>
-                            <button type="button" class="toggle-password" onclick="togglePassword()">
-                                <i class="fas fa-eye" id="toggleIcon"></i>
-                            </button>
-                        </div>
-                        @error('password')
-                            <span class="error-text">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="form-options">
-                        <label class="remember-me">
-                            <input type="checkbox" name="remember">
-                            <span class="checkmark"></span>
-                            Ingat saya
-                        </label>
-                        <a href="{{ route('password.request') }}" class="forgot-password-link">
-                            Lupa Password?
-                        </a>
-                    </div>
-
-                    <button type="submit" class="btn-login">
-                        <span>Masuk</span>
-                        <i class="fas fa-arrow-right"></i>
+                    <button type="submit" class="btn-submit">
+                        <span>Kirim Link Reset</span>
+                        <i class="fas fa-paper-plane"></i>
                     </button>
                 </form>
 
                 <div class="divider">
-                    <span>atau</span>
+                    <span>kembali ke</span>
                 </div>
 
-                <div class="register-link">
-                    <p>Belum punya akun?</p>
-                    <a href="{{ route('register') }}">
-                        Daftar Sekarang
-                        <i class="fas fa-user-plus ms-1"></i>
+                <div class="login-link">
+                    <a href="{{ route('login') }}">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Halaman Login
                     </a>
                 </div>
 
-                <div class="security-note">
-                    <i class="fas fa-lock"></i>
-                    <span>Koneksi aman & terenkripsi</span>
+                <div class="help-note">
+                    <i class="fas fa-question-circle"></i>
+                    <div>
+                        <strong>Perlu bantuan?</strong>
+                        <p>Hubungi admin sistem jika Anda tidak bisa mengakses email</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -205,10 +182,10 @@
 </div>
 
 <style>
-/* Login Page Styles */
-.login-page {
+/* Forgot Password Page Styles */
+.forgot-password-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -216,7 +193,7 @@
     transition: background 0.3s ease;
 }
 
-.login-container {
+.forgot-password-container {
     display: flex;
     max-width: 1000px;
     width: 100%;
@@ -228,18 +205,18 @@
 }
 
 /* Dark mode adjustments */
-[data-theme="dark"] .login-page {
+[data-theme="dark"] .forgot-password-page {
     background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
 }
 
-[data-theme="dark"] .login-container {
+[data-theme="dark"] .forgot-password-container {
     background: #0f172a;
     border: 1px solid rgba(148, 163, 184, 0.2);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* Form Section Dark Mode */
-[data-theme="dark"] .login-form-section {
+[data-theme="dark"] .forgot-password-form-section {
     background: #0f172a;
 }
 
@@ -251,64 +228,49 @@
     color: #cbd5e1;
 }
 
+[data-theme="dark"] .alert-box.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.2);
+}
+
 [data-theme="dark"] .alert-box.error {
     background: rgba(220, 38, 38, 0.1);
     color: #f87171;
     border-color: rgba(248, 113, 113, 0.2);
 }
 
-[data-theme="dark"] .login-form label {
+[data-theme="dark"] .forgot-password-form label {
     color: #e2e8f0;
 }
 
-[data-theme="dark"] .login-form label i {
-    color: #60a5fa;
+[data-theme="dark"] .forgot-password-form label i {
+    color: #a78bfa;
 }
 
-[data-theme="dark"] .login-form input[type="email"],
-[data-theme="dark"] .login-form input[type="password"] {
+[data-theme="dark"] .forgot-password-form input[type="email"] {
     background: #1e293b;
     border-color: rgba(71, 85, 105, 0.5);
     color: #f1f5f9;
 }
 
-[data-theme="dark"] .login-form input:focus {
+[data-theme="dark"] .forgot-password-form input:focus {
     background: #334155;
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.1);
 }
 
-[data-theme="dark"] .login-form input::placeholder {
+[data-theme="dark"] .forgot-password-form input::placeholder {
     color: #64748b;
 }
 
-[data-theme="dark"] .toggle-password {
-    color: #64748b;
+[data-theme="dark"] .btn-submit {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
 }
 
-[data-theme="dark"] .toggle-password:hover {
-    color: #60a5fa;
-}
-
-[data-theme="dark"] .remember-me {
-    color: #cbd5e1;
-}
-
-[data-theme="dark"] .forgot-password-link {
-    color: #60a5fa;
-}
-
-[data-theme="dark"] .forgot-password-link:hover {
-    color: #3b82f6;
-}
-
-[data-theme="dark"] .btn-login {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-}
-
-[data-theme="dark"] .btn-login:hover {
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+[data-theme="dark"] .btn-submit:hover {
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
 }
 
 [data-theme="dark"] .divider {
@@ -320,37 +282,42 @@
     background: rgba(71, 85, 105, 0.5);
 }
 
-[data-theme="dark"] .register-link {
+[data-theme="dark"] .login-link {
     background: #1e293b;
 }
 
-[data-theme="dark"] .register-link p {
-    color: #cbd5e1;
+[data-theme="dark"] .login-link a {
+    color: #a78bfa;
 }
 
-[data-theme="dark"] .register-link a {
-    color: #60a5fa;
+[data-theme="dark"] .login-link a:hover {
+    color: #8b5cf6;
 }
 
-[data-theme="dark"] .register-link a:hover {
-    color: #3b82f6;
+[data-theme="dark"] .help-note {
+    background: #1e293b;
+    border-color: rgba(167, 139, 250, 0.2);
 }
 
-[data-theme="dark"] .security-note {
-    color: #34d399;
+[data-theme="dark"] .help-note strong {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .help-note p {
+    color: #94a3b8;
 }
 
 /* Mobile dark mode */
 @media (max-width: 576px) {
-    [data-theme="dark"] .login-page {
+    [data-theme="dark"] .forgot-password-page {
         background: #0f172a;
     }
 }
 
 /* Branding Section */
-.login-branding {
+.forgot-password-branding {
     flex: 1;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
     padding: 3rem;
     display: flex;
     flex-direction: column;
@@ -360,7 +327,7 @@
     overflow: hidden;
 }
 
-.login-branding::before {
+.forgot-password-branding::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -407,13 +374,13 @@
     margin-top: 0.5rem;
 }
 
-.features-list {
+.instructions-list {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.feature-item {
+.instruction-item {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -424,11 +391,11 @@
     transition: transform 0.3s ease;
 }
 
-.feature-item:hover {
+.instruction-item:hover {
     transform: translateX(10px);
 }
 
-.feature-icon {
+.instruction-icon {
     width: 50px;
     height: 50px;
     border-radius: 12px;
@@ -439,17 +406,17 @@
     flex-shrink: 0;
 }
 
-.feature-icon.bg-1 { background: rgba(255, 193, 7, 0.3); }
-.feature-icon.bg-2 { background: rgba(40, 167, 69, 0.3); }
-.feature-icon.bg-3 { background: rgba(220, 53, 69, 0.3); }
+.instruction-icon.bg-1 { background: rgba(59, 130, 246, 0.3); }
+.instruction-icon.bg-2 { background: rgba(16, 185, 129, 0.3); }
+.instruction-icon.bg-3 { background: rgba(251, 191, 36, 0.3); }
 
-.feature-text h5 {
+.instruction-text h5 {
     font-weight: 700;
     font-size: 1rem;
     margin: 0 0 0.25rem;
 }
 
-.feature-text p {
+.instruction-text p {
     margin: 0;
     font-size: 0.85rem;
     opacity: 0.8;
@@ -469,7 +436,7 @@
 }
 
 /* Form Section */
-.login-form-section {
+.forgot-password-form-section {
     flex: 1;
     padding: 3rem;
     display: flex;
@@ -478,7 +445,7 @@
     background: #fff;
 }
 
-.login-card {
+.forgot-password-card {
     width: 100%;
     max-width: 380px;
 }
@@ -491,7 +458,7 @@
 .logo-icon-sm {
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -504,7 +471,7 @@
 .mobile-logo h2 {
     font-size: 1.75rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -538,6 +505,12 @@
     font-size: 0.9rem;
 }
 
+.alert-box.success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
 .alert-box.error {
     background: #fef2f2;
     color: #dc2626;
@@ -548,11 +521,11 @@
     font-size: 1.1rem;
 }
 
-.login-form .form-group {
+.forgot-password-form .form-group {
     margin-bottom: 1.5rem;
 }
 
-.login-form label {
+.forgot-password-form label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -562,13 +535,12 @@
     font-size: 0.9rem;
 }
 
-.login-form label i {
-    color: #2563EB;
+.forgot-password-form label i {
+    color: #8B5CF6;
     font-size: 0.85rem;
 }
 
-.login-form input[type="email"],
-.login-form input[type="password"] {
+.forgot-password-form input[type="email"] {
     width: 100%;
     padding: 0.875rem 1rem;
     border: 2px solid #E2E8F0;
@@ -579,44 +551,19 @@
     color: #1E293B;
 }
 
-.login-form input:focus {
+.forgot-password-form input:focus {
     outline: none;
-    border-color: #2563EB;
+    border-color: #8B5CF6;
     background: #fff;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
 }
 
-.login-form input.error {
+.forgot-password-form input.error {
     border-color: #dc2626;
 }
 
-.login-form input::placeholder {
+.forgot-password-form input::placeholder {
     color: #94A3B8;
-}
-
-.password-wrapper {
-    position: relative;
-}
-
-.password-wrapper input {
-    padding-right: 3rem;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #94A3B8;
-    cursor: pointer;
-    padding: 0;
-    transition: color 0.3s ease;
-}
-
-.toggle-password:hover {
-    color: #2563EB;
 }
 
 .error-text {
@@ -626,47 +573,10 @@
     margin-top: 0.5rem;
 }
 
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.remember-me {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #64748B;
-    user-select: none;
-}
-
-.remember-me input {
-    width: 18px;
-    height: 18px;
-    accent-color: #2563EB;
-    cursor: pointer;
-}
-
-.forgot-password-link {
-    color: #2563EB;
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.forgot-password-link:hover {
-    color: #1D4ED8;
-    text-decoration: underline;
-}
-
-.btn-login {
+.btn-submit {
     width: 100%;
     padding: 1rem;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -678,15 +588,15 @@
     justify-content: center;
     gap: 0.5rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
 }
 
-.btn-login:hover {
+.btn-submit:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
 }
 
-.btn-login:active {
+.btn-submit:active {
     transform: translateY(0);
 }
 
@@ -710,7 +620,7 @@
     padding: 0 1rem;
 }
 
-.register-link {
+.login-link {
     text-align: center;
     padding: 1.25rem;
     background: #F8FAFC;
@@ -718,62 +628,71 @@
     margin-bottom: 1.5rem;
 }
 
-.register-link p {
-    margin: 0 0 0.5rem;
-    color: #64748B;
-    font-size: 0.9rem;
-}
-
-.register-link a {
-    color: #2563EB;
+.login-link a {
+    color: #8B5CF6;
     text-decoration: none;
     font-weight: 700;
     transition: color 0.3s ease;
 }
 
-.register-link a:hover {
-    color: #1D4ED8;
+.login-link a:hover {
+    color: #7C3AED;
 }
 
-.security-note {
+.help-note {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    color: #16A34A;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
     font-size: 0.85rem;
 }
 
-.security-note i {
+.help-note i {
+    color: #8B5CF6;
+    font-size: 1rem;
+    margin-top: 0.1rem;
+}
+
+.help-note strong {
+    color: #1e293b;
     font-size: 0.9rem;
+}
+
+.help-note p {
+    margin: 0.25rem 0 0;
+    color: #64748b;
+    line-height: 1.4;
 }
 
 /* Responsive */
 @media (max-width: 991px) {
-    .login-container {
+    .forgot-password-container {
         max-width: 450px;
     }
-    
-    .login-form-section {
+
+    .forgot-password-form-section {
         padding: 2rem;
     }
 }
 
 @media (max-width: 576px) {
-    .login-page {
+    .forgot-password-page {
         padding: 0;
         background: #fff;
     }
-    
-    .login-container {
+
+    .forgot-password-container {
         border-radius: 0;
         box-shadow: none;
     }
-    
-    .login-form-section {
+
+    .forgot-password-form-section {
         padding: 1.5rem;
     }
-    
+
     .form-header h3 {
         font-size: 1.5rem;
     }
@@ -784,25 +703,25 @@
 // Theme Toggle Functionality
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
-    const loginPage = document.querySelector('.login-page');
+    const forgotPasswordPage = document.querySelector('.forgot-password-page');
     const themeIcon = document.getElementById('themeIcon');
 
     if (savedTheme === 'dark') {
-        loginPage.setAttribute('data-theme', 'dark');
-        loginPage.setAttribute('data-bs-theme', 'dark');
+        forgotPasswordPage.setAttribute('data-theme', 'dark');
+        forgotPasswordPage.setAttribute('data-bs-theme', 'dark');
         themeIcon.classList.remove('fa-moon');
         themeIcon.classList.add('fa-sun');
     }
 }
 
 function toggleTheme() {
-    const loginPage = document.querySelector('.login-page');
+    const forgotPasswordPage = document.querySelector('.forgot-password-page');
     const themeIcon = document.getElementById('themeIcon');
-    const currentTheme = loginPage.getAttribute('data-theme');
+    const currentTheme = forgotPasswordPage.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-    loginPage.setAttribute('data-theme', newTheme);
-    loginPage.setAttribute('data-bs-theme', newTheme);
+    forgotPasswordPage.setAttribute('data-theme', newTheme);
+    forgotPasswordPage.setAttribute('data-bs-theme', newTheme);
 
     if (newTheme === 'dark') {
         themeIcon.classList.remove('fa-moon');
@@ -820,33 +739,17 @@ function toggleTheme() {
     }));
 }
 
-// Password Toggle
-function togglePassword() {
-    const passwordInput = document.getElementById('password');
-    const toggleIcon = document.getElementById('toggleIcon');
-
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleIcon.classList.remove('fa-eye');
-        toggleIcon.classList.add('fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        toggleIcon.classList.remove('fa-eye-slash');
-        toggleIcon.classList.add('fa-eye');
-    }
-}
-
 // Initialize theme on page load
 document.addEventListener('DOMContentLoaded', function() {
     initTheme();
 
     // Listen for theme changes from other components
     window.addEventListener('themeChanged', function(e) {
-        const loginPage = document.querySelector('.login-page');
+        const forgotPasswordPage = document.querySelector('.forgot-password-page');
         const themeIcon = document.getElementById('themeIcon');
 
-        loginPage.setAttribute('data-theme', e.detail.theme);
-        loginPage.setAttribute('data-bs-theme', e.detail.theme);
+        forgotPasswordPage.setAttribute('data-theme', e.detail.theme);
+        forgotPasswordPage.setAttribute('data-bs-theme', e.detail.theme);
 
         if (e.detail.theme === 'dark') {
             themeIcon.classList.remove('fa-moon');

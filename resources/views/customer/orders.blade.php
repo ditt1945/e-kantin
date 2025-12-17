@@ -50,18 +50,18 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3 order-status-border order-border-{{ $badgeClass }}">
                         <div>
-                            <h6 class="mb-1" style="font-weight: 700; color: var(--text-primary);">{{ $order->kode_pesanan ?? '-' }}</h6>
-                            <small style="color: var(--text-secondary);">{{ $order->tenant->nama_tenant ?? '-' }} • {{ optional($order->created_at)->format('d M Y H:i') }}</small>
+                            <h6 class="mb-1 fw-bold">{{ $order->kode_pesanan ?? '-' }}</h6>
+                            <small class="text-muted">{{ $order->tenant->nama_tenant ?? '-' }} • {{ optional($order->created_at)->format('d M Y H:i') }}</small>
                         </div>
                         <span class="badge bg-{{ $badgeClass }}">
                             <i class="fas fa-check me-1"></i>{{ ucfirst($order->status) }}
                         </span>
                     </div>
 
-                    <div style="background: var(--light-gray); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                    <div class="bg-light p-3 rounded mb-3">
                         @foreach($order->orderItems as $it)
-                            <div class="d-flex justify-content-between mb-2" style="padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-gray);">
-                                <span style="color: var(--text-secondary);">{{ $it->quantity }}x {{ $it->menu->nama_menu ?? '-' }}</span>
+                            <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                <span class="text-muted">{{ $it->quantity }}x {{ $it->menu->nama_menu ?? '-' }}</span>
                                 <strong>Rp {{ number_format($it->subtotal, 0, ',', '.') }}</strong>
                             </div>
                         @endforeach
@@ -69,21 +69,30 @@
 
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
-                            <small style="color: var(--text-secondary);">Total</small>
-                            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">Rp {{ number_format($order->total_harga ?? 0, 0, ',', '.') }}</div>
+                            <small class="text-muted">Total</small>
+                            <div class="fs-5 fw-bold text-primary">Rp {{ number_format($order->total_harga ?? 0, 0, ',', '.') }}</div>
                             @if($payment)
-                                <small class="d-block" style="color: var(--text-secondary);">
+                                <small class="d-block text-muted">
                                     Invoice: {{ $payment->invoice_number }}
                                     @if($payment->isPaid())
                                         <span class="badge bg-success ms-2">Lunas</span>
                                     @elseif($payment->isFailed())
                                         <span class="badge bg-danger ms-2">Gagal</span>
                                     @elseif($payment->status === 'pending_cash')
-                                        <span class="badge bg-info ms-2">Bayar Tunai</span>
+                                        <span class="badge bg-info ms-2">Menunggu Pembayaran Tunai</span>
                                     @else
                                         <span class="badge bg-warning text-dark ms-2">Menunggu Pembayaran</span>
                                     @endif
                                 </small>
+                                @if($payment->payment_method === 'cash')
+                                    <small class="d-block text-info">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Metode: Tunai
+                                    </small>
+                                @elseif($payment->payment_method === 'midtrans')
+                                    <small class="d-block text-info">
+                                        <i class="fas fa-credit-card me-1"></i>Metode: Cashless
+                                    </small>
+                                @endif
                             @endif
                         </div>
 
@@ -93,6 +102,9 @@
                                     {{-- Already paid - show success badge and invoice download --}}
                                     <span class="badge bg-success py-2 px-3 d-flex align-items-center">
                                         <i class="fas fa-check-circle me-1"></i>Lunas
+                                        @if($payment->payment_method === 'cash')
+                                            <i class="fas fa-money-bill-wave ms-1"></i>
+                                        @endif
                                     </span>
                                     <a href="{{ route('payment.invoice', $payment) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-file-invoice me-1"></i>Unduh Invoice
@@ -105,10 +117,10 @@
                                 @elseif($payment->status === 'pending_cash')
                                     {{-- Cash payment pending --}}
                                     <span class="badge bg-info py-2 px-3">
-                                        Menunggu Pembayaran Tunai
+                                        <i class="fas fa-money-bill-wave me-1"></i>Bayar Tunai di Kantin
                                     </span>
                                     <a href="{{ route('payment.show', $order) }}" class="btn btn-sm btn-outline-info">
-                                        <i class="fas fa-eye me-1"></i>Detail
+                                        <i class="fas fa-qrcode me-1"></i>Lihat Kode Pesanan
                                     </a>
                                 @else
                                     {{-- Payment pending - show pay button --}}
@@ -164,15 +176,15 @@
         margin: 0;
     }
     .order-status-border {
-        border-left: 6px solid #F0F0F0;
+        border-left: 4px solid #dee2e6;
         padding-left: 1rem;
     }
-    .order-border-success { border-left-color: #B6CEB4 !important; }
-    .order-border-warning { border-left-color: #D9E9CF !important; }
-    .order-border-primary { border-left-color: #96A78D !important; }
-    .order-border-info { border-left-color: #0EA5E9 !important; }
-    .order-border-danger { border-left-color: #6f7d63 !important; }
-    .order-border-secondary { border-left-color: #F0F0F0 !important; }
+    .order-border-success { border-left-color: #198754 !important; }
+    .order-border-warning { border-left-color: #ffc107 !important; }
+    .order-border-primary { border-left-color: #0d6efd !important; }
+    .order-border-info { border-left-color: #0dcaf0 !important; }
+    .order-border-danger { border-left-color: #dc3545 !important; }
+    .order-border-secondary { border-left-color: #6c757d !important; }
     
     /* Mobile Responsiveness */
     @media (max-width: 768px) {

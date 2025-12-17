@@ -10,7 +10,7 @@
             <h2 class="page-title mb-0">
                 <i class="fas fa-utensils me-2 text-primary"></i>Menu Saya
             </h2>
-            <p class="text-muted small mb-0 d-none d-md-block">{{ $tenant->nama_tenant }} - Kelola menu restoran Anda</p>
+            <p class="text-muted small mb-0 d-none d-md-block">{{ $tenant->nama_tenant }} - Kelola menu kantin anda</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('tenant.dashboard') }}" class="btn btn-sm btn-outline-secondary">

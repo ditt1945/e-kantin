@@ -150,7 +150,7 @@
                                             </button>
 
                                             {{-- Tombol Detail --}}
-                                            <a href="{{ route('menus.show', $menu) }}" class="btn btn-info" title="Lihat Detail">
+                                            <a href="{{ route('tenant.menus.show', $menu) }}" class="btn btn-info" title="Lihat Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         </div>
