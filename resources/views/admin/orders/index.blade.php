@@ -209,7 +209,9 @@
             @if($orders->hasPages())
                 <div style="padding: var(--space-lg);">
                     <div class="pagination-info">
+                        <i class="fas fa-info-circle me-1"></i>
                         Menampilkan {{ $orders->firstItem() }} - {{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
+                        (Halaman {{ $orders->currentPage() }} dari {{ $orders->lastPage() }})
                     </div>
                     <div style="display: flex; justify-content: center;">
                         {{ $orders->links() }}

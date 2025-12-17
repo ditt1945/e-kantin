@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tenant;
 use App\Models\Order;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,11 +49,38 @@ class TenantDashboardController extends Controller
                 }
             );
 
+            $activeMenus = Cache::remember(
+                "tenant_active_menus_{$tenant->id}",
+                now()->addMinutes(5), // Cache for 5 minutes
+                function () use ($tenant) {
+                    return $tenant->menus()->where('is_available', true)->count();
+                }
+            );
+
+            $bestSellerCount = Cache::remember(
+                "tenant_best_seller_count_{$tenant->id}",
+                now()->addMinutes(5), // Cache for 5 minutes
+                function () use ($tenant) {
+                    return $tenant->menus()->where('order_count', '>=', 10)->count();
+                }
+            );
+
+            $pendingCount = Cache::remember(
+                "tenant_pending_count_{$tenant->id}",
+                now()->addMinutes(2), // Cache for 2 minutes
+                function () use ($tenant) {
+                    return $tenant->orders()->where('status', 'pending')->count();
+                }
+            );
+
             return view('tenant.dashboard', [
                 'tenant' => $tenant,
                 'totalMenus' => $totalMenus,
+                'activeMenus' => $activeMenus,
+                'bestSellerCount' => $bestSellerCount,
                 'totalOrdersToday' => $dashboardStats->orders_today ?? 0,
-                'pendapatanHariIni' => $dashboardStats->income_today ?? 0
+                'pendapatanHariIni' => $dashboardStats->income_today ?? 0,
+                'pendingCount' => $pendingCount
             ]);
         } catch (\Exception $e) {
             \Log::error('Error Dashboard Tenant: ' . $e->getMessage() . ' | Baris: ' . $e->getLine());
@@ -94,7 +122,7 @@ class TenantDashboardController extends Controller
             $query->whereDate('created_at', '<=', $validated['to']);
         }
 
-        $orders = $query->paginate(10)->withQueryString();
+        $orders = $query->paginate(15)->withQueryString(); // 15 orders per page for better management
 
         return view('tenant.orders', compact('tenant', 'orders'));
     }

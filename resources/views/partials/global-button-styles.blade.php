@@ -351,6 +351,17 @@
         color: #6c757d;
         font-size: 0.875rem;
         margin: 1rem 0;
+        padding: 0.75rem 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        display: inline-block;
+    }
+
+    [data-theme="dark"] .pagination-info {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
     }
 
     /* Dark Mode Support */

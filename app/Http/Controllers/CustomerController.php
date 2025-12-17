@@ -39,7 +39,7 @@ class CustomerController extends Controller
             $query->where('has_promotion', true);
         }
 
-        $tenants = $query->paginate(9); // Show 9 tenants per page (3x3 grid)
+        $tenants = $query->paginate(6); // Show 6 tenants per page
         return view('customer.tenants', compact('tenants'));
     }
 
@@ -48,7 +48,7 @@ class CustomerController extends Controller
         $menus = $tenant->menus()
             ->with('category')
             ->where('is_available', true)
-            ->paginate(12); // Show 12 menus per page
+            ->get(); // Load all available menus for better UX
 
         return view('customer.menus', compact('tenant', 'menus'));
     }
@@ -56,12 +56,39 @@ class CustomerController extends Controller
     public function addToCart(Request $request, Tenant $tenant, Menu $menu)
     {
         $request->validate([
-            'quantity' => ['required', 'integer', 'min:1', new SufficientStock($menu->id)]
+            'quantity' => ['required', 'integer', 'min:1', new SufficientStock($menu->id)],
+            'order_type' => 'nullable|in:preorder,regular',
+            'delivery_date' => 'nullable|date|after_or_equal:today'
         ]);
 
         // Pastikan menu yang dipilih memang milik tenant pada URL
         if ($menu->tenant_id !== $tenant->id) {
             abort(404);
+        }
+
+        // Check if menu requires pre-order
+        $requiresPreorder = $menu->requiresPreorder();
+        $orderType = $request->order_type ?? ($requiresPreorder ? 'preorder' : 'regular');
+        $deliveryDate = $request->delivery_date;
+
+        // Validate pre-order requirements
+        if ($requiresPreorder) {
+            if ($orderType !== 'preorder') {
+                return back()->with('error', 'Menu ini harus dipesan melalui pre-order!');
+            }
+
+            if (!$deliveryDate) {
+                $deliveryDate = now()->addDay()->format('Y-m-d');
+            }
+
+            // Check if delivery is for tomorrow and pre-order cutoff time has passed
+            $deliveryDateObj = \Carbon\Carbon::parse($deliveryDate);
+            if ($deliveryDateObj->isTomorrow() && !$menu->canPreorderForTomorrow()) {
+                return back()->with('error', 'Pre-order untuk besok telah ditutup (pukul 20:00). Pesan sekarang untuk lusa!');
+            }
+        } else {
+            $orderType = 'regular';
+            $deliveryDate = null;
         }
 
         $user = Auth::user();
@@ -97,11 +124,17 @@ class CustomerController extends Controller
         } else {
             $cartItem->quantity = $request->quantity;
             $cartItem->harga = $menu->harga;
+            $cartItem->order_type = $orderType;
+            $cartItem->delivery_date = $deliveryDate;
         }
 
         $cartItem->save();
 
-        return back()->with('success', 'Menu berhasil ditambahkan ke keranjang!');
+        $message = $orderType === 'preorder'
+            ? 'Menu berhasil ditambahkan ke keranjang (Pre-Order untuk ' . $cartItem->getDeliveryDateFormatted() . ')!'
+            : 'Menu berhasil ditambahkan ke keranjang!';
+
+        return back()->with('success', $message);
     }
 
     public function showCart()
@@ -381,11 +414,49 @@ class CustomerController extends Controller
     /**
      * Show customer order history
      */
-    public function ordersHistory(MidtransService $midtransService)
+    public function ordersHistory(Request $request, MidtransService $midtransService)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $orders = $user->orders()->with('tenant', 'orderItems.menu', 'payment')->latest()->paginate(10);
+
+        // Build query with filters
+        $query = $user->orders()->with('tenant', 'orderItems.menu', 'payment');
+
+        // Apply period filter
+        if ($request->filled('period')) {
+            $period = (int) $request->period;
+            $startDate = now()->subDays($period);
+            $query->where('created_at', '>=', $startDate);
+        }
+
+        // Apply custom date range filter
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $startDate = \Carbon\Carbon::parse($request->start_date);
+            $endDate = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_pesanan', 'like', "%{$search}%")
+                  ->orWhereHas('tenant', function($tenantQuery) use ($search) {
+                      $tenantQuery->where('nama_tenant', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('orderItems.menu', function($menuQuery) use ($search) {
+                      $menuQuery->where('nama_menu', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Use pagination to prevent data overload
+        $orders = $query->latest()->paginate(10)->withQueryString(); // 10 orders per page for better UX
         
         // Auto-check payment status for pending payments from Midtrans
         foreach ($orders as $order) {
