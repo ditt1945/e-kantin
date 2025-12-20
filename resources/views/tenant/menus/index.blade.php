@@ -32,7 +32,7 @@
 
     {{-- Stats Cards --}}
     <div class="row g-2 mb-4">
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md">
             <div class="card border-0 bg-primary text-white" style="border-radius: 10px;">
                 <div class="card-body text-center py-2 py-md-3">
                     <div class="stat-number">{{ $menus->count() }}</div>
@@ -40,7 +40,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md">
             <div class="card border-0 bg-success text-white" style="border-radius: 10px;">
                 <div class="card-body text-center py-2 py-md-3">
                     <div class="stat-number">{{ $menus->where('is_available', true)->where('stok', '>', 0)->count() }}</div>
@@ -48,7 +48,15 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md">
+            <div class="card border-0 bg-info text-white" style="border-radius: 10px;">
+                <div class="card-body text-center py-2 py-md-3">
+                    <div class="stat-number">{{ $menus->where('is_po_based', true)->count() }}</div>
+                    <small class="opacity-75">Pre-Order</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md">
             <div class="card border-0 bg-warning text-dark" style="border-radius: 10px;">
                 <div class="card-body text-center py-2 py-md-3">
                     <div class="stat-number">{{ $menus->where('stok', '>', 0)->where('stok', '<=', 10)->count() }}</div>
@@ -56,7 +64,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md">
             <div class="card border-0 bg-danger text-white" style="border-radius: 10px;">
                 <div class="card-body text-center py-2 py-md-3">
                     <div class="stat-number">{{ $menus->where('stok', 0)->count() }}</div>
@@ -94,9 +102,14 @@
                             <div class="d-flex justify-content-between align-items-start mb-1">
                                 <div class="text-truncate pe-2">
                                     <h6 class="mb-0 fw-bold text-truncate">{{ $menu->nama_menu }}</h6>
-                                    @if($menu->category)
-                                        <small class="text-muted">{{ $menu->category->nama_kategori }}</small>
-                                    @endif
+                                    <div class="d-flex align-items-center gap-1">
+                                        @if($menu->category)
+                                            <small class="text-muted">{{ $menu->category->nama_kategori }}</small>
+                                        @endif
+                                        @if($menu->is_po_based)
+                                            <span class="badge bg-info" style="font-size: 0.6rem;">PO</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 @if($menu->is_available && $menu->stok > 0)
                                     <span class="badge bg-success flex-shrink-0"><i class="fas fa-check"></i></span>
@@ -106,7 +119,16 @@
                                     <span class="badge bg-warning flex-shrink-0"><i class="fas fa-exclamation"></i></span>
                                 @endif
                             </div>
-                            
+
+                            @if($menu->is_po_based)
+                                <div class="mb-1">
+                                    <small class="text-info">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Min {{ $menu->getPoMinimumQuantity() }} • {{ $menu->getPoLeadTimeDays() }} hari
+                                    </small>
+                                </div>
+                            @endif
+
                             @if($menu->deskripsi)
                                 <small class="text-muted d-none d-md-block text-truncate">{{ Str::limit($menu->deskripsi, 50) }}</small>
                             @endif
@@ -114,7 +136,18 @@
                             <div class="d-flex justify-content-between align-items-center mt-2">
                                 <div>
                                     <div class="fw-bold text-primary">Rp {{ number_format($menu->harga, 0, ',', '.') }}</div>
-                                    <small class="text-muted">Stok: {{ $menu->stok }}</small>
+                                    <small class="text-muted">
+                                        @if($menu->is_po_based)
+                                            Stok: {{ $menu->stok }}
+                                            @if($menu->canOrderNow())
+                                                <span class="text-success">• Available</span>
+                                            @else
+                                                <span class="text-warning">• Below min</span>
+                                            @endif
+                                        @else
+                                            Stok: {{ $menu->stok }}
+                                        @endif
+                                    </small>
                                 </div>
                                 <div class="d-flex gap-1">
                                     <a href="{{ route('tenant.menus.edit', $menu) }}" class="btn btn-sm btn-primary">

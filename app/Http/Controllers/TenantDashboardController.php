@@ -101,17 +101,30 @@ class TenantDashboardController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'nullable|in:pending,diproses,selesai,dibatalkan,all',
+            'status' => 'nullable|in:pending,pending_cash,diproses,selesai,dibatalkan,all',
             'from' => 'nullable|date',
-            'to' => 'nullable|date'
+            'to' => 'nullable|date',
+            'type' => 'nullable|in:preorder,regular,all',
+            'show_expired' => 'nullable|boolean'
         ]);
 
         $query = $tenant->orders()
-            ->with(['user', 'orderItems.menu'])
-            ->latest();
+            ->with(['user', 'orderItems.menu', 'payment'])
+            ->when(!($validated['show_expired'] ?? false), function ($q) {
+                $q->active(); // Only show active (non-expired) orders unless explicitly requested
+            })
+            ->when(($validated['type'] ?? null) === 'preorder', function ($q) {
+                $q->orderBy('delivery_date')->orderBy('created_at');
+            }, function ($q) {
+                $q->latest();
+            });
 
         if (!empty($validated['status']) && $validated['status'] !== 'all') {
             $query->where('status', $validated['status']);
+        }
+
+        if (!empty($validated['type']) && $validated['type'] !== 'all') {
+            $query->where('order_type', $validated['type']);
         }
 
         if (!empty($validated['from'])) {
@@ -122,9 +135,17 @@ class TenantDashboardController extends Controller
             $query->whereDate('created_at', '<=', $validated['to']);
         }
 
-        $orders = $query->paginate(15)->withQueryString(); // 15 orders per page for better management
+        $orders = $query
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('tenant.orders', compact('tenant', 'orders'));
+        $activeType = $validated['type'] ?? 'all';
+
+        return view('tenant.orders', [
+            'tenant' => $tenant,
+            'orders' => $orders,
+            'activeType' => $activeType,
+        ]);
     }
 
     /**

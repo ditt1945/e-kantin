@@ -21,7 +21,24 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
 
-        $orders = $query->paginate(15)->withQueryString();
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kode_pesanan', 'like', "%{$search}%")
+                  ->orWhereHas('tenant', function($tenantQuery) use ($search) {
+                      $tenantQuery->where('nama_tenant', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('orderItems.menu', function($menuQuery) use ($search) {
+                      $menuQuery->where('nama_menu', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $orders = $query->latest()->get(); // Load all orders without pagination
         $tenants = Tenant::orderBy('nama_tenant')->get();
 
         return view('admin.orders.index', compact('orders', 'tenants'));

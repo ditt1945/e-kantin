@@ -62,10 +62,23 @@
                                 <div class="flex-grow-1">
                                     <strong class="d-block menu-name">
                                         {{ $menu?->nama_menu ?? 'Menu tidak tersedia' }}
+                                        @if($item->isPreorder())
+                                            <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem;">
+                                                <i class="fas fa-clock"></i> Pre-Order
+                                            </span>
+                                        @endif
                                     </strong>
                                     <small class="text-muted">
                                         {{ $menu?->category?->nama_kategori ?? '-' }}
                                     </small>
+                                    @if($item->isPreorder())
+                                        <div class="mt-1">
+                                            <small class="text-info">
+                                                <i class="fas fa-calendar-day me-1"></i>
+                                                Pengambilan: {{ $item->getDeliveryDateFormatted() }}
+                                            </small>
+                                        </div>
+                                    @endif
                                     <div class="mt-1">
                                         <span class="menu-price">
                                             @ Rp {{ number_format($item->harga, 0, ',', '.') }}

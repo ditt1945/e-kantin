@@ -12,6 +12,32 @@
             </a>
             <div>
                 <h1 class="h5 mb-0 fw-bold">{{ $tenant->nama_tenant }}</h1>
+
+            @push('styles')
+            <style>
+                .popularity-stars {
+                    position: relative;
+                    display: inline-block;
+                    line-height: 1;
+                    font-size: 0.9rem;
+                }
+                .popularity-stars .stars-outer {
+                    color: #e2e8f0;
+                }
+                .popularity-stars .stars-inner {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    color: #f59e0b;
+                }
+                .badge.bg-warning-subtle {
+                    background: #fef9c3;
+                }
+            </style>
+            @endpush
+
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge {{ $tenant->is_active ? 'bg-success' : 'bg-secondary' }} bg-opacity-10 text-dark">
                         <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
@@ -159,7 +185,9 @@
                      data-name="{{ strtolower($menu->nama_menu) }}"
                      data-price="{{ $menu->harga }}"
                      data-stock="{{ $menu->stok }}"
-                     data-order-type="{{ $isHeavyMeal ? 'heavy' : 'light' }}">
+                     data-order-type="{{ $isHeavyMeal ? 'heavy' : 'light' }}"
+                     data-popularity="{{ $menu->buyers_count ?? 0 }}"
+                     data-rating="{{ $menu->popularity_rating ?? $menu->getPopularityRating($menu->buyers_count ?? 0) }}">
                     <div class="menu-compact d-flex gap-3 p-3 border rounded-3 h-100 @if(!$menu->is_available) unavailable @endif @if($requiresPreorder) border-warning @endif" style="background: #fff; transition: all 0.2s;">
                         <!-- Compact Image -->
                         <div class="flex-shrink-0">
@@ -217,6 +245,28 @@
                             <div class="d-flex justify-content-between align-items-end">
                                 <div>
                                     <div class="fw-bold text-primary" style="font-size: 1rem;">Rp {{ number_format($menu->harga, 0, ',', '.') }}</div>
+                                    @php
+                                        $buyersCount = $menu->buyers_count ?? 0;
+                                        $popularityRating = $menu->popularity_rating ?? $menu->getPopularityRating($buyersCount);
+                                        $popularityLabel = $menu->popularity_label ?? $menu->getPopularityLabel($buyersCount);
+                                        $fillPercent = ($popularityRating / 5) * 100;
+                                    @endphp
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <div class="popularity-stars" aria-label="Rating popularitas {{ number_format($popularityRating, 1) }} dari 5 berdasarkan {{ $buyersCount }} pembeli">
+                                            <div class="stars-outer">
+                                                <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                            </div>
+                                            <div class="stars-inner" style="width: {{ $fillPercent }}%;">
+                                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ number_format($popularityRating, 1) }}/5 • {{ $buyersCount }} pembeli</small>
+                                    </div>
+                                    @if($popularityLabel)
+                                        <span class="badge bg-warning-subtle text-dark" style="font-size: 0.7rem; border: 1px solid #fbbf24;">
+                                            <i class="fas fa-fire me-1 text-warning"></i>{{ $popularityLabel }}
+                                        </span>
+                                    @endif
                                     @if($menu->is_available)
                                         @if($requiresPreorder)
                                             <small class="text-warning" style="font-size: 0.7rem;">
@@ -288,16 +338,7 @@
             </a>
         </div>
 
-        <!-- Pagination -->
-        @if($menus->hasPages())
-            <div class="d-flex flex-column align-items-center mt-4">
-                <div class="pagination-info">
-                    Menampilkan {{ $menus->firstItem() }} - {{ $menus->lastItem() }} dari {{ $menus->total() }} menu
-                </div>
-                {{ $menus->links() }}
-            </div>
-        @endif
-    @else
+        @else
         <!-- Compact Empty State -->
         <div class="text-center py-5">
             <div class="mb-3">
@@ -409,10 +450,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'price-high':
                     return parseInt(b.dataset.price) - parseInt(a.dataset.price);
                 case 'popular':
-                    // Sort by order count (add order_count to dataset)
-                    const aOrders = parseInt(a.querySelector('.fa-shopping-bag')?.closest('small')?.textContent?.match(/\d+/)?.[0] || 0);
-                    const bOrders = parseInt(b.querySelector('.fa-shopping-bag')?.closest('small')?.textContent?.match(/\d+/)?.[0] || 0);
-                    return bOrders - aOrders;
+                    const aPop = parseInt(a.dataset.popularity || '0');
+                    const bPop = parseInt(b.dataset.popularity || '0');
+                    if (bPop === aPop) {
+                        const aRate = parseFloat(a.dataset.rating || '0');
+                        const bRate = parseFloat(b.dataset.rating || '0');
+                        return bRate - aRate;
+                    }
+                    return bPop - aPop;
                 case 'stock':
                     return parseInt(b.dataset.stock) - parseInt(a.dataset.stock);
                 default:

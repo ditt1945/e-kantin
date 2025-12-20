@@ -670,13 +670,6 @@
         </div>
         @endforeach
     </div>
-
-    <!-- Pagination -->
-    @if($tenants->hasPages())
-    <div class="d-flex justify-content-center mt-5">
-        {{ $tenants->links() }}
-    </div>
-    @endif
     @else
     <!-- Empty State -->
     <div class="empty-state">

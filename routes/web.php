@@ -8,6 +8,7 @@ use App\Http\Controllers\TenantDashboardController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\TenantMenuController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\Admin\TenantController as AdminTenantController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\MenuController as AdminMenuController;
@@ -125,7 +126,7 @@ Route::middleware('auth')->group(function () {
     
     // Routes untuk CUSTOMER
     Route::middleware('customer')->prefix('customer')->group(function () {
-        // ✅ DASHBOARD CUSTOMER
+        //  DASHBOARD CUSTOMER
         Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
         
         Route::get('/tenants', [CustomerController::class, 'showTenants'])->name('customer.tenants');
@@ -182,7 +183,7 @@ Route::middleware('auth')->group(function () {
         
         // Reports & Analytics
         Route::get('/reports', [TenantDashboardController::class, 'reports'])->name('tenant.reports');
-        
+
         // Settings
         Route::get('/settings', [TenantDashboardController::class, 'settings'])->name('tenant.settings');
         Route::put('/settings', [TenantDashboardController::class, 'updateSettings'])->name('tenant.settings.update');

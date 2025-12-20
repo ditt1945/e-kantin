@@ -39,7 +39,7 @@ class CustomerController extends Controller
             $query->where('has_promotion', true);
         }
 
-        $tenants = $query->paginate(6); // Show 6 tenants per page
+        $tenants = $query->get(); // Load all tenants without pagination
         return view('customer.tenants', compact('tenants'));
     }
 
@@ -48,7 +48,17 @@ class CustomerController extends Controller
         $menus = $tenant->menus()
             ->with('category')
             ->where('is_available', true)
-            ->get(); // Load all available menus for better UX
+            ->withCount(['orderItems as buyers_count' => function($q) {
+                $q->join('orders', 'orders.id', '=', 'order_items.order_id')
+                  ->whereNotNull('orders.user_id')
+                  ->select(DB::raw('COUNT(DISTINCT orders.user_id)'));
+            }])
+            ->get()
+            ->map(function ($menu) {
+                $menu->popularity_rating = $menu->getPopularityRating($menu->buyers_count ?? 0);
+                $menu->popularity_label = $menu->getPopularityLabel($menu->buyers_count ?? 0);
+                return $menu;
+            }); // Load all available menus for better UX
 
         return view('customer.menus', compact('tenant', 'menus'));
     }
@@ -258,11 +268,23 @@ class CustomerController extends Controller
      */
     private function createOrder(Cart $cart): Order
     {
+        // Check if any cart item is preorder
+        $hasPreorderItem = $cart->items()->where('order_type', 'preorder')->exists();
+
+        // Get delivery date from preorder items, or use first available
+        $deliveryDate = null;
+        if ($hasPreorderItem) {
+            $preorderItem = $cart->items()->where('order_type', 'preorder')->first();
+            $deliveryDate = $preorderItem->delivery_date;
+        }
+
         return Order::create([
             'tenant_id' => $cart->tenant_id,
             'user_id' => Auth::id(),
             'total_harga' => 0,
             'status' => Order::STATUS_PENDING,
+            'order_type' => $hasPreorderItem ? 'preorder' : 'regular',
+            'delivery_date' => $deliveryDate,
         ]);
     }
 
@@ -456,7 +478,7 @@ class CustomerController extends Controller
         }
 
         // Use pagination to prevent data overload
-        $orders = $query->latest()->paginate(10)->withQueryString(); // 10 orders per page for better UX
+        $orders = $query->latest()->paginate(8)->withQueryString();
         
         // Auto-check payment status for pending payments from Midtrans
         foreach ($orders as $order) {

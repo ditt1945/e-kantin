@@ -153,15 +153,11 @@
         @endforeach
     </div>
 
-    @if($orders->hasPages())
-        <div class="pagination-info">
-            Menampilkan {{ $orders->firstItem() }} - {{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
-        </div>
-        <div class="d-flex justify-content-center mb-4">
-            {{ $orders->links() }}
-        </div>
+    @if($orders instanceof \Illuminate\Contracts\Pagination\Paginator && $orders->hasPages())
+        @include('components.pagination.orders', ['paginator' => $orders])
     @endif
-@else
+
+    @else
 <div class="text-center py-5">
     <i class="fas fa-history fa-4x text-muted mb-3"></i>
     <h4 class="text-muted">Belum ada riwayat pesanan</h4>

@@ -26,4 +26,9 @@ class Tenant extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function purchaseOrders()
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
 }

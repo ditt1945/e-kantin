@@ -46,12 +46,25 @@ class TenantMenuController extends Controller
             'stok' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id', // ✅ Validasi kategori ada
             'deskripsi' => 'nullable',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_po_based' => 'boolean',
+            'po_minimum_quantity' => 'nullable|required_if:is_po_based,1|integer|min:1',
+            'po_lead_time_days' => 'nullable|required_if:is_po_based,1|integer|min:1|max:30'
         ]);
 
         $data = $request->all();
         $data['tenant_id'] = $tenant->id; // Auto set tenant_id
         $data['is_available'] = $request->has('is_available');
+        $data['is_po_based'] = $request->has('is_po_based');
+
+        // Set default PO values if not PO-based
+        if (!$data['is_po_based']) {
+            $data['po_minimum_quantity'] = null;
+            $data['po_lead_time_days'] = null;
+        } else {
+            $data['po_minimum_quantity'] = $request->po_minimum_quantity ?? 10;
+            $data['po_lead_time_days'] = $request->po_lead_time_days ?? 3;
+        }
 
         if ($request->hasFile('gambar')) {
             $data['gambar'] = $request->file('gambar')->store('menus', 'public');
@@ -87,11 +100,24 @@ class TenantMenuController extends Controller
             'stok' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id', // ✅ Validasi kategori
             'deskripsi' => 'nullable',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_po_based' => 'boolean',
+            'po_minimum_quantity' => 'nullable|required_if:is_po_based,1|integer|min:1',
+            'po_lead_time_days' => 'nullable|required_if:is_po_based,1|integer|min:1|max:30'
         ]);
 
         $data = $request->all();
         $data['is_available'] = $request->has('is_available');
+        $data['is_po_based'] = $request->has('is_po_based');
+
+        // Set default PO values if not PO-based
+        if (!$data['is_po_based']) {
+            $data['po_minimum_quantity'] = null;
+            $data['po_lead_time_days'] = null;
+        } else {
+            $data['po_minimum_quantity'] = $request->po_minimum_quantity ?? 10;
+            $data['po_lead_time_days'] = $request->po_lead_time_days ?? 3;
+        }
 
         if ($request->hasFile('gambar')) {
             // Delete old image if exists

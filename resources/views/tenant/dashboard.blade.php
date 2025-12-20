@@ -494,6 +494,14 @@
             <span class="card-trend up"><i class="fas fa-arrow-up fa-xs"></i> Mantap!</span>
         </div>
         <div class="stat-card">
+            <div class="card-icon" style="background: linear-gradient(135deg, #EF4444, #DC2626);">
+                <i class="fas fa-fire"></i>
+            </div>
+            <div class="card-label">Menu Terlaris</div>
+            <div class="card-value">{{ $bestSellerCount ?? 0 }}</div>
+            <span class="card-trend hot"><i class="fas fa-star fa-xs"></i> Best Seller</span>
+        </div>
+        <div class="stat-card">
             <div class="card-icon" style="background: linear-gradient(135deg, #3B82F6, #2563EB);">
                 <i class="fas fa-utensils"></i>
             </div>

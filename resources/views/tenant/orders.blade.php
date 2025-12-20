@@ -2,13 +2,33 @@
 
 @section('content')
 <div class="container-fluid py-3">
+    {{-- Show Expired Warning --}}
+    @if(request('show_expired'))
+        <div class="alert alert-warning mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Sedang menampilkan semua pesanan (termasuk yang kadaluarsa)</strong>
+            <br>
+            <small>Orders kadaluarsa ditandai dengan badge "Kadaluarsa" dan tampil redup.</small>
+        </div>
+    @endif
+
     {{-- Header --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
         <div>
-            <h2 class="orders-title mb-0"><i class="fas fa-shopping-cart me-2 text-primary"></i>Pesanan</h2>
-            <div class="text-muted small d-none d-md-block">{{ $tenant->nama_tenant }} - Kelola pesanan masuk</div>
+            <h2 class="orders-title mb-0"><i class="fas fa-shopping-cart me-2 text-primary"></i>Pesanan Aktif</h2>
+            <div class="text-muted small d-none d-md-block">{{ $tenant->nama_tenant }} - Riwayat pesanan (auto-hide after expiry)</div>
+            <div class="text-muted small">
+                <i class="fas fa-info-circle me-1"></i>
+                Regular: 24 jam, Preorder: 24 jam setelah pengambilan
+            </div>
         </div>
         <div class="d-flex gap-2">
+            <a href="{{ route('tenant.orders', array_merge(request()->query(), ['show_expired' => request('show_expired') ? null : 'true'])) }}"
+               class="btn btn-sm {{ request('show_expired') ? 'btn-warning' : 'btn-outline-secondary' }}">
+                <i class="fas fa-history me-1"></i>
+                <span class="d-none d-sm-inline">{{ request('show_expired') ? 'Sembunyi Kadaluarsa' : 'Tampilkan Semua' }}</span>
+                <span class="d-sm-none">{{ request('show_expired') ? 'Aktif' : 'Semua' }}</span>
+            </a>
             <a href="{{ route('tenant.dashboard') }}" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i><span class="d-none d-sm-inline">Kembali</span>
             </a>
@@ -20,6 +40,7 @@
         <div class="card-body py-2">
             <div class="row g-2 align-items-end">
                 <input type="hidden" name="status" value="{{ request('status') }}">
+                <input type="hidden" name="type" value="{{ request('type') }}">
                 <div class="col-6 col-md-3">
                     <label class="form-label small text-muted mb-1">Dari</label>
                     <input type="date" name="from" value="{{ request('from') }}" class="form-control form-control-sm">
@@ -53,14 +74,31 @@
             'selesai' => ['label' => 'Selesai', 'class' => 'success'],
             'dibatalkan' => ['label' => 'Batal', 'class' => 'danger'],
         ];
+
+        // Jenis order (langsung vs preorder) untuk filter
+        $types = $types ?? [
+            'all' => 'Semua Jenis',
+            'regular' => 'Langsung',
+            'preorder' => 'Pre-Order',
+        ];
     @endphp
 
     <div class="d-flex flex-wrap gap-1 mb-3">
         @foreach($statuses as $key => $s)
             @php $isActive = ($currentStatus == $key) || ($key=='all' && empty($currentStatus)); @endphp
-            <a href="{{ $key == 'all' ? route('tenant.orders') : route('tenant.orders', ['status' => $key]) }}" 
+                <a href="{{ $key == 'all' ? route('tenant.orders', request()->only(['type','from','to'])) : route('tenant.orders', ['status' => $key] + request()->only(['type','from','to'])) }}" 
                class="btn btn-sm {{ $isActive ? 'btn-' . $s['class'] : 'btn-outline-' . $s['class'] }}">
                 {{ $s['label'] }}
+            </a>
+        @endforeach
+    </div>
+
+    <div class="d-flex flex-wrap gap-1 mb-3">
+        @foreach($types as $key => $label)
+            @php $isActive = ($activeType == $key) || ($key=='all' && empty($activeType)); @endphp
+            <a href="{{ $key == 'all' ? route('tenant.orders', request()->only(['status','from','to'])) : route('tenant.orders', ['type' => $key] + request()->only(['status','from','to'])) }}"
+               class="btn btn-sm {{ $isActive ? 'btn-dark' : 'btn-outline-dark' }}">
+                {{ $label }}
             </a>
         @endforeach
     </div>
@@ -87,10 +125,23 @@
                         'dibatalkan' => 'danger',
                         default => 'secondary',
                     };
+
+                    $isPreorder = $order->order_type === 'preorder';
+                    $deliveryDate = $order->delivery_date?->format('d M Y');
                 @endphp
 
-                <div class="col-12" id="order-{{ $order->id }}">
-                    <div class="card {{ $borderClass }}">
+                <!-- DEBUG: Order {{ $order->id }} Info -->
+                <div class="alert alert-warning alert-sm mb-2" style="font-size: 0.75rem;">
+                    <strong>DEBUG Order {{ $order->id }}:</strong><br>
+                    Kode: {{ $order->kode_pesanan }}<br>
+                    Type: {{ $order->order_type }}<br>
+                    isPreorder: {{ $isPreorder ? 'TRUE' : 'FALSE' }}<br>
+                    Delivery: {{ $deliveryDate }}<br>
+                    User: {{ $order->user->name ?? 'No user' }}
+                </div>
+
+                <div class="col-12" id="order-{{ $order->id }}" @if($order->isExpired()) style="opacity: 0.7;" @endif>
+                    <div class="card {{ $borderClass }} @if($order->isExpired()) border-secondary @endif">
                         <div class="card-body p-2 p-md-3">
                             <div class="d-flex flex-column flex-md-row justify-content-between">
                                 {{-- Order Info --}}
@@ -98,12 +149,44 @@
                                     <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
                                         <h6 class="mb-0 fw-bold">{{ $order->kode_pesanan ?? '-' }}</h6>
                                         <span class="badge bg-{{ $badgeClass }}">{{ ucfirst($order->status) }}</span>
+                                        @if($isPreorder)
+                                            <span class="badge bg-dark">Pre-Order</span>
+                                        @else
+                                            <span class="badge bg-secondary">Langsung</span>
+                                        @endif
+                                        @if($order->isExpired())
+                                            <span class="badge bg-danger">Kadaluarsa</span>
+                                        @endif
                                     </div>
                                     <div class="text-muted small mb-1">
                                         <i class="fas fa-user me-1"></i>{{ $order->user->name ?? '-' }}
                                         <span class="mx-2">•</span>
                                         <i class="fas fa-clock me-1"></i>{{ optional($order->created_at)->format('d M H:i') }}
                                     </div>
+                                    @if($isPreorder)
+                                        <div class="text-muted small mb-2">
+                                            <i class="fas fa-calendar-day me-1 text-warning"></i>Jadwal: {{ $deliveryDate ?? 'Tidak ditentukan' }}
+                                        </div>
+                                    @endif
+
+                                    {{-- Expiry Warning --}}
+                                    @php
+                                        $remainingTime = $order->getRemainingTime();
+                                        $isExpiringSoon = !$order->isExpired() &&
+                                                         ($order->order_type === 'preorder' ?
+                                                          now()->diffInHours($order->getExpiryDate()) <= 6 :
+                                                          now()->diffInHours($order->getExpiryDate()) <= 2);
+                                    @endphp
+
+                                    @if($remainingTime && $remainingTime !== 'Kadaluarsa')
+                                        <div class="text-muted small mb-2 {{ $isExpiringSoon ? 'text-warning' : '' }}">
+                                            <i class="fas fa-clock me-1 {{ $isExpiringSoon ? 'text-warning' : '' }}"></i>
+                                            Sisa waktu: {{ $remainingTime }}
+                                            @if($isExpiringSoon)
+                                                <span class="badge bg-warning text-dark ms-1">Akan kadaluarsa</span>
+                                            @endif
+                                        </div>
+                                    @endif
                                     <div class="mt-2">
                                         <div class="order-items-container">
                                             @foreach($order->orderItems as $index => $item)
@@ -188,17 +271,12 @@
             @endforeach
         </div>
 
-        <!-- Pagination Info -->
-        @if($orders->hasPages())
-            <div class="d-flex flex-column align-items-center mt-4">
-                <div class="pagination-info">
-                    Menampilkan {{ $orders->firstItem() }} - {{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
-                </div>
-                {{ $orders->links() }}
-            </div>
+        @if($orders instanceof \Illuminate\Contracts\Pagination\Paginator && $orders->hasPages())
+            @include('components.pagination.orders', ['paginator' => $orders])
         @endif
     @else
         <div class="text-center py-5">
+                                       
             <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
             <h4 class="text-muted">Belum ada pesanan</h4>
             <p class="text-muted">Belum ada customer yang memesan.</p>
@@ -210,6 +288,16 @@
     .orders-title {
         font-size: 1.5rem;
         font-weight: 600;
+
+                                    <div class="d-flex flex-wrap gap-1 mb-3"> 
+                                        @foreach($types as $key => $label)
+                                            @php $isActive = ($activeType == $key) || ($key=='all' && empty($activeType)); @endphp
+                                            <a href="{{ $key == 'all' ? route('tenant.orders', array_merge(['status' => request('status')], request()->only(['from','to']))) : route('tenant.orders', array_merge(['type' => $key], request()->only(['status','from','to']))) }}"
+                                               class="btn btn-sm {{ $isActive ? 'btn-dark' : 'btn-outline-dark' }}">
+                                                {{ $label }}
+                                            </a>
+                                        @endforeach
+                                    </div>
     }
 
     /* Pending cash visual treatment */

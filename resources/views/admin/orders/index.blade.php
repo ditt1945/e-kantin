@@ -206,15 +206,8 @@
                 </tbody>
             </table>
 
-            @if($orders->hasPages())
-                <div style="padding: var(--space-lg);">
-                    <div class="pagination-info">
-                        Menampilkan {{ $orders->firstItem() }} - {{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
-                    </div>
-                    <div style="display: flex; justify-content: center;">
-                        {{ $orders->links() }}
-                    </div>
-                </div>
+            @if($orders instanceof \Illuminate\Contracts\Pagination\Paginator && $orders->hasPages())
+                @include('components.pagination.orders', ['paginator' => $orders])
             @endif
         @else
             <div class="empty-state">
